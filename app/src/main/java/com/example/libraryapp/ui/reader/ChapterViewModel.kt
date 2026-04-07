@@ -4,17 +4,24 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import com.example.libraryapp.model.Chapter
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 
 class ChapterViewModel(application: Application) : AndroidViewModel(application) {
 
     private val db = FirebaseFirestore.getInstance()
+    private val auth = FirebaseAuth.getInstance()
 
     val chapters = MutableLiveData<List<Chapter>>()
     val currentChapter = MutableLiveData<Chapter>()
     private var currentIndex = 0
 
-    // Load chapters theo bookId và order bắt đầu
+    private fun getUid(): String? = auth.currentUser?.uid
+
+    // ───────────────────────────────────────────
+    // Load chapters + nhảy đúng chapter
+    // ───────────────────────────────────────────
     fun loadChapters(bookId: String, startOrder: Int = 1) {
         db.collection("books")
             .document(bookId)
@@ -49,21 +56,63 @@ class ChapterViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    // ───────────────────────────────────────────
+    // Lưu vị trí đọc lên Firestore
+    // ───────────────────────────────────────────
     fun saveReadingPosition(bookId: String, order: Int, scrollY: Int) {
-        val prefs = getApplication<Application>().getSharedPreferences("reading_pos", 0)
-        prefs.edit()
-            .putInt("${bookId}_order", order)
-            .putInt("${bookId}_chapter_${order}_scrollY", scrollY) // ✅ key theo chapter
-            .apply()
+        val uid = getUid() ?: return
+
+        db.collection("users")
+            .document(uid)
+            .collection("readingProgress")
+            .document(bookId)
+            .set(
+                mapOf(
+                    "lastOrder" to order,
+                    "chapter_${order}_scrollY" to scrollY,
+                    "updatedAt" to System.currentTimeMillis()
+                ),
+                SetOptions.merge()
+            )
     }
 
-    fun getScrollForChapter(bookId: String, order: Int): Int {
-        val prefs = getApplication<Application>().getSharedPreferences("reading_pos", 0)
-        return prefs.getInt("${bookId}_chapter_${order}_scrollY", 0) // ✅ lấy đúng chapter
+    // ───────────────────────────────────────────
+    // Lấy scroll position của chapter (từ Firestore, callback)
+    // ───────────────────────────────────────────
+    fun getScrollForChapter(bookId: String, order: Int, onResult: (Int) -> Unit) {
+        val uid = getUid() ?: run { onResult(0); return }
+
+        db.collection("users")
+            .document(uid)
+            .collection("readingProgress")
+            .document(bookId)
+            .get()
+            .addOnSuccessListener { doc ->
+                val scrollY = doc.getLong("chapter_${order}_scrollY")?.toInt() ?: 0
+                onResult(scrollY)
+            }
+            .addOnFailureListener {
+                onResult(0)
+            }
     }
 
-    fun getLastReadOrder(bookId: String): Int {
-        val prefs = getApplication<Application>().getSharedPreferences("reading_pos", 0)
-        return prefs.getInt("${bookId}_order", 1)
+    // ───────────────────────────────────────────
+    // Lấy chapter cuối cùng đã đọc (từ Firestore, callback)
+    // ───────────────────────────────────────────
+    fun getLastReadOrder(bookId: String, onResult: (Int) -> Unit) {
+        val uid = getUid() ?: run { onResult(1); return }
+
+        db.collection("users")
+            .document(uid)
+            .collection("readingProgress")
+            .document(bookId)
+            .get()
+            .addOnSuccessListener { doc ->
+                val lastOrder = doc.getLong("lastOrder")?.toInt() ?: 1
+                onResult(lastOrder)
+            }
+            .addOnFailureListener {
+                onResult(1)
+            }
     }
 }

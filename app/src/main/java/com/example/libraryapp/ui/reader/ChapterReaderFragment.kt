@@ -17,7 +17,10 @@ class ChapterReaderFragment : Fragment() {
     private lateinit var bookId: String
     private var chapterOrder: Int = 1
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         _binding = FragmentChapterReaderBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -40,8 +43,12 @@ class ChapterReaderFragment : Fragment() {
                 binding.tvChapterTitle.text = chapter.title
                 binding.tvChapterContent.text = chapter.content
 
-                val scrollY = viewModel.getScrollForChapter(bookId, chapter.order)
-                binding.scrollView.post { binding.scrollView.scrollTo(0, scrollY) }
+                // Lấy scroll từ Firestore theo đúng chapter
+                viewModel.getScrollForChapter(bookId, chapter.order) { scrollY ->
+                    binding.scrollView.post {
+                        binding.scrollView.scrollTo(0, scrollY)
+                    }
+                }
             }
         }
 
@@ -49,7 +56,8 @@ class ChapterReaderFragment : Fragment() {
         binding.btnPrev.setOnClickListener { viewModel.prevChapter() }
 
         binding.scrollView.setOnScrollChangeListener { _, _, scrollY, _, _ ->
-            val currentOrder = viewModel.currentChapter.value?.order ?: return@setOnScrollChangeListener
+            val currentOrder = viewModel.currentChapter.value?.order
+                ?: return@setOnScrollChangeListener
             viewModel.saveReadingPosition(bookId, currentOrder, scrollY)
         }
     }
