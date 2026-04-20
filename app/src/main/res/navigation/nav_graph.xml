@@ -40,5 +40,9 @@
         android:name="com.example.libraryapp.ui.search.SearchFragment"
         android:label="Search" />
 
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.example.libraryapp.ui.profile.ProfileFragment"
+        android:label="Search" />
 
 </navigation>

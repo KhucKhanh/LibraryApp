@@ -42,7 +42,7 @@ class HomeViewModel : ViewModel() {
             .document(userId)
             .collection("recent")
             .orderBy("timestamp", Query.Direction.DESCENDING)
-            .limit(5)
+            .limit(10)
             .get()
             .addOnSuccessListener { result ->
                 val bookIds = result.map { it.id }
