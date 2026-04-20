@@ -7,7 +7,8 @@ import com.example.libraryapp.databinding.ItemLibraryBinding
 import com.example.libraryapp.model.Library
 
 class LibraryAdapter(
-    private val items: List<Library>
+    private val items: List<Library>,
+    private val onClick: (Library) -> Unit
 ) : RecyclerView.Adapter<LibraryAdapter.VH>() {
 
     class VH(val binding: ItemLibraryBinding) :
@@ -33,7 +34,7 @@ class LibraryAdapter(
 
         // click sau này mở list sách
         holder.itemView.setOnClickListener {
-            // TODO: open LibraryDetailFragment
+            onClick(lib)
         }
     }
 

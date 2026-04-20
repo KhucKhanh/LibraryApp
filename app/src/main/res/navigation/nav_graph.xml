@@ -48,6 +48,19 @@
     <fragment
         android:id="@+id/libraryFragment"
         android:name="com.example.libraryapp.ui.library.LibraryFragment"
-        android:label="Library" />
+        android:label="Library">
+        <action
+            android:id="@+id/action_libraryFragment_to_libraryDetailFragment"
+            app:destination="@id/libraryDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/libraryDetailFragment"
+        android:name="com.example.libraryapp.ui.library.LibraryDetailFragment"
+        android:label="Library Detail">
+        <action
+            android:id="@+id/action_libraryDetailFragment_to_bookDetailFragment"
+            app:destination="@id/bookDetailFragment" />
+    </fragment>
 
 </navigation>

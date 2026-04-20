@@ -16,7 +16,6 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- ẢNH -->
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="150dp">
@@ -30,7 +29,6 @@
                 android:scaleType="centerCrop"
                 android:src="@android:color/darker_gray" />
 
-            <!-- ❤️ FAVORITE BUTTON -->
             <ImageButton
                 android:id="@+id/btnFavorite"
                 android:layout_width="28dp"
@@ -44,7 +42,6 @@
         </FrameLayout>
 
 
-        <!-- TEXT -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

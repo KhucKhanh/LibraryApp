@@ -5,6 +5,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.example.libraryapp.R
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.libraryapp.adapter.LibraryAdapter
 import com.example.libraryapp.data.LibraryRepository
@@ -41,7 +43,18 @@ class LibraryFragment : Fragment() {
         repo.getLibraries { list ->
 
             binding.rvLibraries.adapter =
-                LibraryAdapter(list)
+                LibraryAdapter(list) { library ->
+
+                    val bundle = Bundle().apply {
+                        putString("libraryId", library.id)
+                        putString("libraryName", library.name)
+                    }
+
+                    findNavController().navigate(
+                        R.id.action_libraryFragment_to_libraryDetailFragment,
+                        bundle
+                    )
+                }
         }
     }
 }
