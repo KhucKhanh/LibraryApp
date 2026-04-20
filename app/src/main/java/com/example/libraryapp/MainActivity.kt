@@ -8,6 +8,9 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.google.firebase.auth.FirebaseAuth
+import android.content.Intent
+import com.example.libraryapp.ui.chat.ChatActivity
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class MainActivity : AppCompatActivity() {
 
@@ -43,6 +46,14 @@ class MainActivity : AppCompatActivity() {
                 destination.id == R.id.registerFragment
             ) View.GONE else View.VISIBLE
         }
+
+        val btnChat = findViewById<FloatingActionButton>(R.id.btnChat)
+
+        btnChat.setOnClickListener {
+            val intent = Intent(this, ChatActivity::class.java)
+            startActivity(intent)
+        }
+
     }
 
     override fun onStart() {
