@@ -41,6 +41,7 @@ class HomeFragment : Fragment() {
                 putString("author", selectedBook.author)
                 putString("description", selectedBook.description)
                 putString("imageUrl", selectedBook.imageUrl)
+                putString("category", selectedBook.category)
             }
 
             findNavController().navigate(
@@ -49,34 +50,40 @@ class HomeFragment : Fragment() {
             )
         }
 
-        // ===== All Books =====
+        // ===== Adapters =====
         adapter = BookAdapter(emptyList(), onBookClick)
+        recommendedAdapter = BookAdapter(emptyList(), onBookClick)
+        recentAdapter = BookAdapter(emptyList(), onBookClick)
+
+        // ===== RecyclerViews =====
         binding.rvBooks.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         binding.rvBooks.adapter = adapter
 
-        // ===== Recommended =====
-        recommendedAdapter = BookAdapter(emptyList(), onBookClick)
         binding.rvRecommended.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         binding.rvRecommended.adapter = recommendedAdapter
 
-        // ===== Recent =====
-        recentAdapter = BookAdapter(emptyList(), onBookClick)
         binding.rvRecent.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         binding.rvRecent.adapter = recentAdapter
 
-        // ViewModel
+        // ===== ViewModel =====
         viewModel = ViewModelProvider(this)[HomeViewModel::class.java]
 
-        // Observe all books
+        // 🔥 LOAD DATA (KHÔNG gọi loadBooks nữa)
+        viewModel.loadRecommendations()
+        viewModel.loadRecentBooks()
+
+        // ===== OBSERVE =====
         viewModel.books.observe(viewLifecycleOwner) {
             adapter.updateData(it)
         }
 
-        // Load + observe recent books
-        viewModel.loadRecentBooks()
+        viewModel.recommendedBooks.observe(viewLifecycleOwner) {
+            recommendedAdapter.updateData(it)
+        }
+
         viewModel.recentBooks.observe(viewLifecycleOwner) {
             recentAdapter.updateData(it)
         }
