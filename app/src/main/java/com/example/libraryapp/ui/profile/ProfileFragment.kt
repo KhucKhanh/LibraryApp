@@ -34,10 +34,14 @@ class ProfileFragment : Fragment() {
             FirebaseAuth.getInstance().signOut()
 
             val navOptions = NavOptions.Builder()
-                .setPopUpTo(R.id.homeFragment, true)
+                .setPopUpTo(R.id.nav_graph, true) // xoá toàn bộ stack
                 .build()
 
-            findNavController().navigate(R.id.loginFragment, null, navOptions)
+            findNavController().navigate(
+                R.id.loginFragment,
+                null,
+                navOptions
+            )
         }
     }
 }

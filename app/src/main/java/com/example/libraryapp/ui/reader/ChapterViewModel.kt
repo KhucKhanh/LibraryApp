@@ -115,4 +115,12 @@ class ChapterViewModel(application: Application) : AndroidViewModel(application)
                 onResult(1)
             }
     }
+
+    fun isLastChapter(): Boolean {
+        val list = chapters.value ?: return false
+        val current = currentChapter.value ?: return false
+
+        return current.order == list.lastOrNull()?.order
+    }
+
 }

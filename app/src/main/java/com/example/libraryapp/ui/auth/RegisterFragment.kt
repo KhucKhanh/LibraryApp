@@ -46,9 +46,15 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
 
             viewModel.register(email, password) { success, error ->
                 if (success) {
-                    Toast.makeText(requireContext(), "Đăng ký thành công", Toast.LENGTH_SHORT).show()
+                    val navOptions = androidx.navigation.NavOptions.Builder()
+                        .setPopUpTo(R.id.registerFragment, true)
+                        .build()
 
-                    findNavController().popBackStack()
+                    findNavController().navigate(
+                        R.id.loginFragment,
+                        null,
+                        navOptions
+                    )
 
                 } else {
                     Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show()

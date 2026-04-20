@@ -68,14 +68,11 @@ class HomeFragment : Fragment() {
             LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         binding.rvRecent.adapter = recentAdapter
 
-        // ===== ViewModel =====
         viewModel = ViewModelProvider(this)[HomeViewModel::class.java]
 
-        // 🔥 LOAD DATA (KHÔNG gọi loadBooks nữa)
         viewModel.loadRecommendations()
         viewModel.loadRecentBooks()
 
-        // ===== OBSERVE =====
         viewModel.books.observe(viewLifecycleOwner) {
             adapter.updateData(it)
         }

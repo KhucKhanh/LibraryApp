@@ -40,7 +40,7 @@ class HomeViewModel : ViewModel() {
 
         db.collection("users")
             .document(userId)
-            .collection("recent")
+            .collection("recentBooks")
             .orderBy("timestamp", Query.Direction.DESCENDING)
             .limit(10)
             .get()
