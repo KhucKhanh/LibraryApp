@@ -1,12 +1,15 @@
 package com.example.libraryapp.ui.reader
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.libraryapp.databinding.FragmentChapterReaderBinding
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 class ChapterReaderFragment : Fragment() {
 
@@ -16,6 +19,8 @@ class ChapterReaderFragment : Fragment() {
     private lateinit var viewModel: ChapterViewModel
     private lateinit var bookId: String
     private var chapterOrder: Int = 1
+
+    var db = FirebaseFirestore.getInstance()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -43,6 +48,8 @@ class ChapterReaderFragment : Fragment() {
                 binding.tvChapterTitle.text = chapter.title
                 binding.tvChapterContent.text = chapter.content
 
+                saveRecent(bookId)
+
                 // Lấy scroll từ Firestore theo đúng chapter
                 viewModel.getScrollForChapter(bookId, chapter.order) { scrollY ->
                     binding.scrollView.post {
@@ -60,6 +67,22 @@ class ChapterReaderFragment : Fragment() {
                 ?: return@setOnScrollChangeListener
             viewModel.saveReadingPosition(bookId, currentOrder, scrollY)
         }
+    }
+
+    private fun saveRecent(bookId: String) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
+        val data = hashMapOf(
+            "timestamp" to System.currentTimeMillis()
+        )
+
+        db.collection("users")
+            .document(userId)
+            .collection("recent")
+            .document(bookId)
+            .set(data)
+
+        Log.d("RECENT", "Saved book: $bookId")
     }
 
     override fun onDestroyView() {

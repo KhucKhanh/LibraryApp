@@ -40,6 +40,7 @@ class BookDetailFragment : Fragment() {
         binding.tvTitle.text = arguments?.getString("title") ?: "No title"
         binding.tvAuthor.text = arguments?.getString("author") ?: "No author"
         binding.tvDescription.text = arguments?.getString("description") ?: "No description"
+
         Glide.with(requireContext())
             .load(arguments?.getString("imageUrl"))
             .into(binding.imgBook)

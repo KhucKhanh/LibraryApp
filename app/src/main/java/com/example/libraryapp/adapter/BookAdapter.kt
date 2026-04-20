@@ -27,11 +27,11 @@ class BookAdapter(
     override fun onBindViewHolder(holder: BookViewHolder, position: Int) {
         val book = books[position]
 
-        holder.binding.tvTitle.text = book.title
-        holder.binding.tvAuthor.text = book.author
+        holder.binding.tvTitle.text = book.title ?: ""
+        holder.binding.tvAuthor.text = book.author ?: ""
 
         Glide.with(holder.itemView.context)
-            .load(book.imageUrl)
+            .load(book.imageUrl ?: "")
             .into(holder.binding.imgBook)
 
         holder.binding.root.setOnClickListener {
@@ -41,7 +41,6 @@ class BookAdapter(
 
     override fun getItemCount(): Int = books.size
 
-    // 🔥 QUAN TRỌNG
     fun updateData(newBooks: List<Book>) {
         books = newBooks
         notifyDataSetChanged()

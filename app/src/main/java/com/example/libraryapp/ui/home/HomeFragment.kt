@@ -7,16 +7,20 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.libraryapp.databinding.FragmentHomeBinding
 import androidx.navigation.fragment.findNavController
 import com.example.libraryapp.R
 import com.example.libraryapp.adapter.BookAdapter
+import com.example.libraryapp.databinding.FragmentHomeBinding
+import com.example.libraryapp.model.Book
 
 class HomeFragment : Fragment() {
 
     private lateinit var binding: FragmentHomeBinding
     private lateinit var viewModel: HomeViewModel
+
     private lateinit var adapter: BookAdapter
+    private lateinit var recommendedAdapter: BookAdapter
+    private lateinit var recentAdapter: BookAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -30,8 +34,7 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        adapter = BookAdapter(emptyList()) { selectedBook ->
-
+        val onBookClick: (Book) -> Unit = { selectedBook ->
             val bundle = Bundle().apply {
                 putString("bookId", selectedBook.id)
                 putString("title", selectedBook.title)
@@ -45,13 +48,37 @@ class HomeFragment : Fragment() {
                 bundle
             )
         }
-        binding.rvBooks.layoutManager = LinearLayoutManager(requireContext())
+
+        // ===== All Books =====
+        adapter = BookAdapter(emptyList(), onBookClick)
+        binding.rvBooks.layoutManager =
+            LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         binding.rvBooks.adapter = adapter
 
+        // ===== Recommended =====
+        recommendedAdapter = BookAdapter(emptyList(), onBookClick)
+        binding.rvRecommended.layoutManager =
+            LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+        binding.rvRecommended.adapter = recommendedAdapter
+
+        // ===== Recent =====
+        recentAdapter = BookAdapter(emptyList(), onBookClick)
+        binding.rvRecent.layoutManager =
+            LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+        binding.rvRecent.adapter = recentAdapter
+
+        // ViewModel
         viewModel = ViewModelProvider(this)[HomeViewModel::class.java]
 
+        // Observe all books
         viewModel.books.observe(viewLifecycleOwner) {
             adapter.updateData(it)
+        }
+
+        // Load + observe recent books
+        viewModel.loadRecentBooks()
+        viewModel.recentBooks.observe(viewLifecycleOwner) {
+            recentAdapter.updateData(it)
         }
     }
 }
