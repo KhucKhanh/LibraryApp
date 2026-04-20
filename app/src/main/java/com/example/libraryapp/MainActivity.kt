@@ -10,6 +10,7 @@ import androidx.navigation.ui.setupWithNavController
 import com.google.firebase.auth.FirebaseAuth
 import android.content.Intent
 import com.example.libraryapp.ui.chat.ChatActivity
+import com.example.libraryapp.ui.chat.ChatBottomSheet
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class MainActivity : AppCompatActivity() {
@@ -50,8 +51,7 @@ class MainActivity : AppCompatActivity() {
         val btnChat = findViewById<FloatingActionButton>(R.id.btnChat)
 
         btnChat.setOnClickListener {
-            val intent = Intent(this, ChatActivity::class.java)
-            startActivity(intent)
+            ChatBottomSheet().show(supportFragmentManager, "chat")
         }
 
     }
