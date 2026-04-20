@@ -35,5 +35,10 @@
         android:id="@+id/registerFragment"
         android:name="com.example.libraryapp.ui.auth.RegisterFragment" />
 
+    <fragment
+        android:id="@+id/searchFragment"
+        android:name="com.example.libraryapp.ui.search.SearchFragment"
+        android:label="Search" />
+
 
 </navigation>
