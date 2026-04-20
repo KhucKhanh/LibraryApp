@@ -25,16 +25,14 @@ class ProfileFragment : Fragment() {
 
         val user = FirebaseAuth.getInstance().currentUser
 
-        // ✅ Hiển thị email
         binding.txtEmail.text = user?.email ?: "No email"
 
-        // 🔥 Logout
         binding.btnLogout.setOnClickListener {
 
             FirebaseAuth.getInstance().signOut()
 
             val navOptions = NavOptions.Builder()
-                .setPopUpTo(R.id.nav_graph, true) // xoá toàn bộ stack
+                .setPopUpTo(R.id.nav_graph, true)
                 .build()
 
             findNavController().navigate(

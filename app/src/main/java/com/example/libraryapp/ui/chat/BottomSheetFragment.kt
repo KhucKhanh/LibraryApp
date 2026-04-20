@@ -21,6 +21,26 @@ class ChatBottomSheet : BottomSheetDialogFragment() {
     private val messages = mutableListOf<Message>()
     private lateinit var adapter: ChatAdapter
 
+    private val userId by lazy {
+        com.google.firebase.auth.FirebaseAuth.getInstance()
+            .currentUser?.uid ?: throw Exception("User not logged in")
+    }
+
+    private val chatId by lazy {
+        val prefs = requireContext()
+            .getSharedPreferences("chat_prefs", 0)
+
+        val saved = prefs.getString("chat_id", null)
+
+        if (saved != null) {
+            saved
+        } else {
+            val newId = java.util.UUID.randomUUID().toString()
+            prefs.edit().putString("chat_id", newId).apply()
+            newId
+        }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -60,7 +80,12 @@ class ChatBottomSheet : BottomSheetDialogFragment() {
             }
 
             // 3. CALL AI
-            viewModel.sendMessage(requestMessages) { reply ->
+            viewModel.sendMessage(
+                userId = userId,
+                chatId = chatId,
+                userText = text,
+                messages = requestMessages
+            ) { reply ->
 
                 messages.add(Message(reply, false))
                 adapter.notifyItemInserted(messages.size - 1)

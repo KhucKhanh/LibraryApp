@@ -54,6 +54,14 @@ class MainActivity : AppCompatActivity() {
             ChatBottomSheet().show(supportFragmentManager, "chat")
         }
 
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            val shouldHide =
+                destination.id == R.id.loginFragment || destination.id == R.id.registerFragment
+
+            bottomNav.visibility = if (shouldHide) View.GONE else View.VISIBLE
+            btnChat.visibility = if (shouldHide) View.GONE else View.VISIBLE
+        }
+
     }
 
     override fun onStart() {
