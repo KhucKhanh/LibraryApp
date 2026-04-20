@@ -9,7 +9,10 @@
         android:id="@+id/searchFragment"
         android:icon="@drawable/ic_launcher_foreground"
         android:title="Search"/>
-
+    <item
+        android:id="@+id/libraryFragment"
+        android:icon="@drawable/ic_launcher_foreground"
+        android:title="Library"/>
     <item
         android:id="@+id/profileFragment"
         android:icon="@drawable/ic_launcher_foreground"

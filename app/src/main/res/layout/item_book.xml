@@ -17,14 +17,32 @@
         android:orientation="vertical">
 
         <!-- ẢNH -->
-        <ImageView
-            android:id="@+id/imgBook"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="150dp"
-            android:background="@drawable/bg_image_rounded"
-            android:clipToOutline="true"
-            android:scaleType="centerCrop"
-            android:src="@android:color/darker_gray" />
+            android:layout_height="150dp">
+
+            <ImageView
+                android:id="@+id/imgBook"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_image_rounded"
+                android:clipToOutline="true"
+                android:scaleType="centerCrop"
+                android:src="@android:color/darker_gray" />
+
+            <!-- ❤️ FAVORITE BUTTON -->
+            <ImageButton
+                android:id="@+id/btnFavorite"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_gravity="end|top"
+                android:layout_margin="6dp"
+                android:background="@android:color/transparent"
+                android:src="@drawable/ic_favorite_border"
+                android:contentDescription="favorite" />
+
+        </FrameLayout>
+
 
         <!-- TEXT -->
         <LinearLayout

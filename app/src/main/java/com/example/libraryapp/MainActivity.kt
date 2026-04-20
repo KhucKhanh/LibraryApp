@@ -21,13 +21,14 @@ class MainActivity : AppCompatActivity() {
 
         val navController = navHostFragment.navController
 
+        val graph = navController.navInflater.inflate(R.navigation.nav_graph)
         val user = FirebaseAuth.getInstance().currentUser
 
-        if (user == null) {
-            navController.navigate(R.id.loginFragment)
-        } else {
-            navController.navigate(R.id.homeFragment)
-        }
+        graph.setStartDestination(
+            if (user != null) R.id.homeFragment else R.id.loginFragment
+        )
+
+        navController.graph = graph
 
 
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNav)
