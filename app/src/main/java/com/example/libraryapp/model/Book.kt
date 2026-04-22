@@ -6,5 +6,10 @@ data class Book(
     val author: String = "",
     val category: String = "",
     val imageUrl: String = "",
-    val description: String = ""
+    val description: String = "",
+
+    val language: String = "vi",
+    val publishYear: Int = 0,
+    val tags: List<String> = emptyList()
+
 )

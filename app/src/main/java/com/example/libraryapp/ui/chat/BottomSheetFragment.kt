@@ -11,6 +11,7 @@ import com.example.libraryapp.databinding.ChatBottomSheetBinding
 import com.example.libraryapp.model.Message
 import com.example.libraryapp.model.MessageRequest
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.example.libraryapp.ai.AIContextManager
 
 class ChatBottomSheet : BottomSheetDialogFragment() {
 
@@ -53,7 +54,6 @@ class ChatBottomSheet : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // ⚠️ init ViewModel (tạm đơn giản)
         viewModel = ViewModelProvider(this)[ChatViewModel::class.java]
 
         adapter = ChatAdapter(messages)
@@ -71,13 +71,23 @@ class ChatBottomSheet : BottomSheetDialogFragment() {
 
             binding.edtMessage.text.clear()
 
-            // 2. convert history → API format
-            val requestMessages = messages.map {
+            val requestMessages = mutableListOf<MessageRequest>()
+
+            requestMessages.add(
                 MessageRequest(
-                    role = if (it.isUser) "user" else "assistant",
-                    content = it.text
+                    role = "system",
+                    content = AIContextManager.buildPrompt("")
                 )
-            }
+            )
+
+            requestMessages.addAll(
+                messages.map {
+                    MessageRequest(
+                        role = if (it.isUser) "user" else "assistant",
+                        content = it.text
+                    )
+                }
+            )
 
             // 3. CALL AI
             viewModel.sendMessage(

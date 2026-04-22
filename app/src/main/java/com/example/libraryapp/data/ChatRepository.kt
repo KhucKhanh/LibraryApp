@@ -19,6 +19,8 @@ class ChatRepository(
     ): String {
         return try {
 
+            Log.d("AI_REQUEST", messages.toString())
+
             val request = GroqRequest(
                 model = "llama-3.1-8b-instant",
                 messages = messages

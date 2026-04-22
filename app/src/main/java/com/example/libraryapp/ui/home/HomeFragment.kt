@@ -12,6 +12,7 @@ import com.example.libraryapp.R
 import com.example.libraryapp.adapter.BookAdapter
 import com.example.libraryapp.databinding.FragmentHomeBinding
 import com.example.libraryapp.model.Book
+import com.example.libraryapp.ai.AIContextManager
 
 class HomeFragment : Fragment() {
 
@@ -35,6 +36,9 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val onBookClick: (Book) -> Unit = { selectedBook ->
+
+            AIContextManager.lastSelectedBook = selectedBook
+
             val bundle = Bundle().apply {
                 putString("bookId", selectedBook.id)
                 putString("title", selectedBook.title)
@@ -48,6 +52,7 @@ class HomeFragment : Fragment() {
                 R.id.action_homeFragment_to_bookDetailFragment,
                 bundle
             )
+
         }
 
         // ===== Adapters =====
@@ -75,6 +80,9 @@ class HomeFragment : Fragment() {
 
         viewModel.books.observe(viewLifecycleOwner) {
             adapter.updateData(it)
+
+            AIContextManager.currentScreen = "Home"
+            AIContextManager.allBooks = it
         }
 
         viewModel.recommendedBooks.observe(viewLifecycleOwner) {

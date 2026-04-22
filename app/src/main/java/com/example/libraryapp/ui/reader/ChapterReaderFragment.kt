@@ -8,6 +8,8 @@ import com.example.libraryapp.databinding.FragmentChapterReaderBinding
 import com.example.libraryapp.utils.RecommendationUtils
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.example.libraryapp.ai.AIContextManager
+import com.example.libraryapp.model.Book
 
 class ChapterReaderFragment : Fragment() {
 
@@ -23,6 +25,11 @@ class ChapterReaderFragment : Fragment() {
     private var hasStartScore = false
     private var hasFinishScore = false
 
+    private var title: String? = null
+    private var author: String? = null
+    private var description: String? = null
+
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -37,6 +44,10 @@ class ChapterReaderFragment : Fragment() {
         chapterOrder = arguments?.getInt("order") ?: 1
         category = arguments?.getString("category")
 
+        title = arguments?.getString("title")
+        author = arguments?.getString("author")
+        description = arguments?.getString("description")
+
         viewModel = ViewModelProvider(
             this,
             ViewModelProvider.AndroidViewModelFactory(requireActivity().application)
@@ -47,6 +58,20 @@ class ChapterReaderFragment : Fragment() {
         viewModel.currentChapter.observe(viewLifecycleOwner) { chapter ->
 
             if (chapter != null) {
+
+                val book = Book(
+                    id = bookId,
+                    title = title ?: "",
+                    author = author ?: "",
+                    description = description ?: "",
+                    category = category ?: "",
+                    imageUrl = ""
+                )
+
+                AIContextManager.currentScreen = "ChapterReader"
+                AIContextManager.currentBook = book
+                AIContextManager.currentChapter = chapter.title
+                AIContextManager.currentChapterContent = chapter.content
 
                 binding.tvChapterTitle.text = chapter.title
                 binding.tvChapterContent.text = chapter.content

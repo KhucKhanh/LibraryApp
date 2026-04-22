@@ -13,6 +13,7 @@ import com.example.libraryapp.data.LibraryRepository
 import com.example.libraryapp.databinding.FragmentBookDetailBinding
 import com.example.libraryapp.ui.reader.ChapterViewModel
 import com.example.libraryapp.utils.RecommendationUtils
+import com.example.libraryapp.ai.AIContextManager
 
 class BookDetailFragment : Fragment() {
 
@@ -40,10 +41,23 @@ class BookDetailFragment : Fragment() {
         val title = arguments?.getString("title") ?: "No title"
         val author = arguments?.getString("author") ?: "No author"
         val description = arguments?.getString("description") ?: "No description"
-        val imageUrl = arguments?.getString("imageUrl")
-        val category = arguments?.getString("category")
+        val imageUrl = arguments?.getString("imageUrl") ?: ""
+        val category = arguments?.getString("category") ?: ""
 
         viewModel = ViewModelProvider(this)[BookDetailViewModel::class.java]
+
+        val book = com.example.libraryapp.model.Book(
+            id = bookId,
+            title = title,
+            author = author,
+            description = description,
+            imageUrl = imageUrl,
+            category = category
+        )
+
+        AIContextManager.currentScreen = "BookDetail"
+        AIContextManager.currentBook = book
+        AIContextManager.currentChapter = null
 
         binding.tvTitle.text = title
         binding.tvAuthor.text = author
@@ -84,6 +98,11 @@ class BookDetailFragment : Fragment() {
                 putString("bookId", chapter.bookId)
                 putInt("order", chapter.order)
                 putString("category", category)
+
+                putString("title", title)
+                putString("author", author)
+                putString("description", description)
+
             }
 
             findNavController().navigate(
@@ -116,6 +135,11 @@ class BookDetailFragment : Fragment() {
                     putString("bookId", bookId)
                     putInt("order", lastOrder)
                     putString("category", category)
+
+                    putString("title", title)
+                    putString("author", author)
+                    putString("description", description)
+
                 }
 
                 findNavController().navigate(
