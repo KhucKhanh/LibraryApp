@@ -4,38 +4,126 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#FFFFFF">
+    android:background="@color/background">
 
+    <!-- ===== HEADER ===== -->
     <LinearLayout
         android:id="@+id/headerSection"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:background="@drawable/bg_header"
+        android:padding="20dp">
 
-        <ImageView
-            android:id="@+id/imgBook"
+        <!-- IMAGE + BUTTONS -->
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:scaleType="centerCrop"
-            android:background="#DDDDDD" />
+            android:layout_height="220dp">
 
+            <ImageView
+                android:id="@+id/imgBook"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:background="#DDDDDD" />
+
+            <!-- BACK -->
+            <ImageButton
+                android:id="@+id/btnBack"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="top|start"
+                android:layout_margin="10dp"
+                android:background="@android:color/transparent"
+                android:src="@android:drawable/ic_media_previous"
+                android:contentDescription="back" />
+
+            <!-- FAVORITE -->
+            <ImageButton
+                android:id="@+id/btnFavorite"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="top|end"
+                android:layout_margin="10dp"
+                android:background="@android:color/transparent"
+                android:src="@drawable/ic_favorite_border"
+                android:contentDescription="favorite" />
+        </FrameLayout>
+
+        <!-- TITLE -->
         <TextView
             android:id="@+id/tvTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Book Title"
-            android:textSize="20sp"
+            android:textColor="@android:color/white"
+            android:textSize="22sp"
             android:textStyle="bold"
             android:layout_marginTop="12dp" />
 
+        <!-- AUTHOR -->
         <TextView
             android:id="@+id/tvAuthor"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Author"
-            android:textSize="16sp"
+            android:textColor="#E0E0E0"
+            android:textSize="14sp"
             android:layout_marginTop="4dp" />
+
+        <!-- ===== BUTTONS ===== -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp">
+
+            <!-- ĐỌC TỪ ĐẦU -->
+            <Button
+                android:id="@+id/btnReadFromStart"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:text="Từ đầu"
+                android:textAllCaps="false"
+                android:textColor="#4A6CF7"
+                android:backgroundTint="#E8EDFF" />
+
+            <Space
+                android:layout_width="8dp"
+                android:layout_height="wrap_content"/>
+
+            <!-- ĐỌC TIẾP -->
+            <Button
+                android:id="@+id/btnContinueReading"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:text="Đọc tiếp"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:backgroundTint="#FFB300" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- ===== DESCRIPTION CARD ===== -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@android:color/white"
+        android:layout_margin="16dp"
+        android:padding="16dp"
+        android:elevation="4dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Mô tả"
+            android:textStyle="bold"
+            android:textSize="16sp"/>
 
         <TextView
             android:id="@+id/tvDescription"
@@ -43,28 +131,12 @@
             android:layout_height="wrap_content"
             android:text="Description"
             android:textSize="14sp"
-            android:layout_marginTop="12dp" />
-
-        <!-- Button đọc tiếp -->
-        <Button
-            android:id="@+id/btnContinueReading"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Đọc tiếp"
-            android:layout_marginTop="16dp"
-            android:layout_gravity="center_horizontal" />
-
-        <ImageButton
-            android:id="@+id/btnFavorite"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="@android:color/transparent"
-            android:src="@drawable/ic_favorite_border"
-            android:contentDescription="favorite" />
-
+            android:layout_marginTop="8dp"
+            android:lineSpacingExtra="4dp"/>
 
     </LinearLayout>
 
+    <!-- ===== CHAPTER TITLE ===== -->
     <TextView
         android:id="@+id/tvChapterLabel"
         android:layout_width="match_parent"
@@ -72,17 +144,17 @@
         android:text="Danh sách chương"
         android:textStyle="bold"
         android:textSize="16sp"
-        android:paddingStart="16dp"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp" />
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="8dp"/>
 
+    <!-- ===== CHAPTER LIST ===== -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvChapters"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
         android:paddingBottom="50dp"
         android:clipToPadding="false" />
 

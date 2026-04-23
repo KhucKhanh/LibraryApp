@@ -20,11 +20,11 @@ class ChapterRepository {
                 }
 
                 Log.d("REPO", "Loaded ${chapters.size} chapters")
-
+                Log.d("REPO", "Querying: books/$bookId/chapters")
                 onResult(chapters)
             }
             .addOnFailureListener {
-                Log.e("REPO", "Error", it)
+                Log.e("REPO", "Error: ${it.message}", it) // ✅ xem message cụ thể
                 onResult(emptyList())
             }
     }

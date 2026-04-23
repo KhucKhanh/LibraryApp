@@ -23,13 +23,6 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Xin chào 👋"
-                android:textColor="@android:color/white"
-                android:textSize="14sp"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:text="Thư viện của bạn"
                 android:textColor="@android:color/white"
                 android:textSize="24sp"

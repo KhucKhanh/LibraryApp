@@ -1,6 +1,7 @@
 package com.example.libraryapp.ui.detail
 
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -38,6 +39,8 @@ class BookDetailFragment : Fragment() {
 
         bookId = arguments?.getString("bookId") ?: return
 
+        Log.d("BOOK_DETAIL", "bookId = $bookId")
+
         val title = arguments?.getString("title") ?: "No title"
         val author = arguments?.getString("author") ?: "No author"
         val description = arguments?.getString("description") ?: "No description"
@@ -67,7 +70,9 @@ class BookDetailFragment : Fragment() {
             .load(imageUrl)
             .into(binding.imgBook)
 
-        RecommendationUtils.addCategoryScore(category, 1)
+        if (!category.isNullOrEmpty()) {
+            RecommendationUtils.addCategoryScore(category, 1)
+        }
 
         libraryRepo.isBookInLibrary("liked", bookId) { liked ->
 
@@ -117,6 +122,7 @@ class BookDetailFragment : Fragment() {
         }
 
         viewModel.chapters.observe(viewLifecycleOwner) {
+            Log.d("FRAGMENT", "observe triggered, size = ${it.size}")
             chapterAdapter.updateData(it)
         }
 

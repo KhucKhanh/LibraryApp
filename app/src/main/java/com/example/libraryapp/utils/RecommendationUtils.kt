@@ -2,6 +2,7 @@ package com.example.libraryapp.utils
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 
 object RecommendationUtils {
 
@@ -9,26 +10,19 @@ object RecommendationUtils {
 
     fun addCategoryScore(category: String?, score: Int) {
 
-        if (category == null) return
+        // ✅ FIX 1: chặn null + empty + blank
+        if (category.isNullOrBlank()) return
 
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
         val userRef = db.collection("users").document(userId)
 
-        userRef.get().addOnSuccessListener { doc ->
+        // ✅ FIX 2: dùng atomic update (KHÔNG cần get/set lại)
+        val field = "categoryScore.$category"
 
-            val map = doc.get("categoryScore") as? Map<String, Long> ?: emptyMap()
-
-            val current = map[category] ?: 0L
-            val newScore = current + score
-
-            val updated = map.toMutableMap()
-            updated[category] = newScore
-
-            userRef.set(
-                mapOf("categoryScore" to updated),
-                com.google.firebase.firestore.SetOptions.merge()
-            )
-        }
+        userRef.set(
+            mapOf(field to com.google.firebase.firestore.FieldValue.increment(score.toLong())),
+            SetOptions.merge()
+        )
     }
 }

@@ -16,9 +16,10 @@ class BookDetailViewModel : ViewModel() {
 
     fun loadChapters(bookId: String) {
         repository.getChaptersByBook(bookId) {
-            _chapters.value = it
 
-            Log.d("FIREBASE_TEST", "Size: ${it.size}")
+            Log.d("VIEWMODEL", "chapters loaded: ${it.size}")
+
+            _chapters.value = it
         }
     }
 }

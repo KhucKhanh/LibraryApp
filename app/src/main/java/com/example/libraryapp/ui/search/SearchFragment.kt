@@ -4,13 +4,15 @@ import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.libraryapp.adapter.BookAdapter
 import com.example.libraryapp.databinding.FragmentSearchBinding
 import kotlinx.coroutines.*
-
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
+import com.example.libraryapp.R
 
 class SearchFragment : Fragment() {
 
@@ -19,6 +21,7 @@ class SearchFragment : Fragment() {
     private lateinit var adapter: BookAdapter
 
     private var job: Job? = null
+    private var isSearching = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -32,26 +35,44 @@ class SearchFragment : Fragment() {
 
         viewModel = ViewModelProvider(requireActivity())[SearchViewModel::class.java]
 
-        adapter = BookAdapter(emptyList()) {}
+        adapter = BookAdapter(emptyList()) { book ->
 
-        // ✅ QUAN TRỌNG
+            val bookId = book.id ?: return@BookAdapter
+
+            Log.d("SEARCH", "Navigating with bookId = $bookId")
+
+
+            val bundle = Bundle().apply {
+                putString("bookId", bookId)
+                putString("title", book.title ?: "")
+                putString("author", book.author ?: "")
+                putString("description", book.description ?: "")
+                putString("imageUrl", book.imageUrl ?: "")
+                putString("category", book.category ?: "")
+            }
+
+            findNavController().navigate(
+                R.id.action_searchFragment_to_bookDetailFragment,
+                bundle
+            )
+        }
+
         binding.rvBooks.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
 
         binding.rvBooks.adapter = adapter
 
-        // observe data
-        viewModel.books.observe(viewLifecycleOwner) {
-            adapter.updateData(it)
+        viewModel.books.observe(viewLifecycleOwner) { list ->
+            adapter.updateData(list)
 
+            val query = binding.edtSearch.text.toString().trim()
             binding.txtEmpty.visibility =
-                if (it.isEmpty() && binding.edtSearch.text.toString().isNotEmpty())
+                if (list.isEmpty() && query.isNotEmpty())
                     View.VISIBLE
                 else
                     View.GONE
         }
 
-        // 🔥 search realtime + debounce (FIXED)
         binding.edtSearch.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
                 val query = s.toString().trim()
@@ -67,12 +88,13 @@ class SearchFragment : Fragment() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
 
-        // load lần đầu
         viewModel.getAllBooks()
+
+
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        job?.cancel() // ✅ tránh leak
+        job?.cancel()
     }
 }

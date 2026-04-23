@@ -16,15 +16,16 @@ class SearchViewModel : ViewModel() {
     fun getAllBooks() {
         db.collection("books")
             .get()
-            .addOnSuccessListener {
-                allBooks = it.toObjects(Book::class.java)
-                books.value = allBooks
+            .addOnSuccessListener { result ->
+                allBooks = result.documents.map { doc ->
+                    doc.toObject(Book::class.java)!!.copy(id = doc.id) // ✅
+                }
             }
     }
 
     fun searchBooks(query: String) {
         if (query.isEmpty()) {
-            books.value = allBooks
+            books.value = emptyList()
             return
         }
 
