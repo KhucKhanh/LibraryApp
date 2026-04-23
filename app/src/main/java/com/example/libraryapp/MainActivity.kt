@@ -39,15 +39,6 @@ class MainActivity : AppCompatActivity() {
 
         bottomNav.setupWithNavController(navController)
 
-        navController.addOnDestinationChangedListener { _, destination, _ ->
-
-            bottomNav.visibility = if (
-                destination.id == R.id.chapterReaderFragment ||
-                destination.id == R.id.loginFragment ||
-                destination.id == R.id.registerFragment
-            ) View.GONE else View.VISIBLE
-        }
-
         val btnChat = findViewById<FloatingActionButton>(R.id.btnChat)
 
         btnChat.setOnClickListener {
@@ -55,11 +46,17 @@ class MainActivity : AppCompatActivity() {
         }
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
-            val shouldHide =
-                destination.id == R.id.loginFragment || destination.id == R.id.registerFragment
+            val shouldHideBottom =
+                destination.id == R.id.loginFragment ||
+                        destination.id == R.id.registerFragment ||
+                        destination.id == R.id.chapterReaderFragment
 
-            bottomNav.visibility = if (shouldHide) View.GONE else View.VISIBLE
-            btnChat.visibility = if (shouldHide) View.GONE else View.VISIBLE
+            val shouldHideChat =
+                destination.id == R.id.loginFragment ||
+                        destination.id == R.id.registerFragment
+
+            bottomNav.visibility = if (shouldHideBottom) View.GONE else View.VISIBLE
+            btnChat.visibility = if (shouldHideChat) View.GONE else View.VISIBLE
         }
 
     }
