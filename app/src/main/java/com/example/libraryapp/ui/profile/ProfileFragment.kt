@@ -30,10 +30,13 @@ class ProfileFragment : Fragment() {
 
         loadStats(userId)
 
+        val sharedPref = requireActivity().getSharedPreferences("settings", android.content.Context.MODE_PRIVATE)
+
         val docRef = db.collection("users").document(userId)
 
         docRef.get(com.google.firebase.firestore.Source.CACHE)
             .addOnSuccessListener { doc ->
+                if (!isAdded) return@addOnSuccessListener // ✅ thêm dòng này
                 val displayName = doc.getString("displayName") ?: user.email ?: ""
                 val avatarUrl = doc.getString("avatarUrl") ?: ""
                 binding.txtEmail.text = displayName
@@ -44,6 +47,7 @@ class ProfileFragment : Fragment() {
 
         docRef.get(com.google.firebase.firestore.Source.SERVER)
             .addOnSuccessListener { doc ->
+                if (!isAdded) return@addOnSuccessListener // ✅ thêm dòng này
                 val displayName = doc.getString("displayName") ?: user.email ?: ""
                 val avatarUrl = doc.getString("avatarUrl") ?: ""
                 binding.txtEmail.text = displayName
@@ -67,6 +71,13 @@ class ProfileFragment : Fragment() {
         binding.btnEditProfile.setOnClickListener {
             findNavController().navigate(R.id.action_profileFragment_to_editProfileFragment)
         }
+
+        binding.switchDarkMode.isChecked = sharedPref.getBoolean("dark_mode", false)
+
+        binding.switchDarkMode.setOnCheckedChangeListener { _, isChecked ->
+            sharedPref.edit().putBoolean("dark_mode", isChecked).apply()
+        }
+
 
     }
 

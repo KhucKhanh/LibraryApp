@@ -75,6 +75,7 @@ class BookDetailFragment : Fragment() {
         }
 
         libraryRepo.isBookInLibrary("liked", bookId) { liked ->
+            if (_binding == null) return@isBookInLibrary // ✅ thêm dòng này
 
             isLiked = liked
 
@@ -87,6 +88,8 @@ class BookDetailFragment : Fragment() {
         binding.btnFavorite.setOnClickListener {
 
             libraryRepo.toggleLiked(bookId) { liked ->
+
+                if (_binding == null) return@toggleLiked // ✅ thêm dòng này
 
                 isLiked = liked
 
@@ -136,6 +139,7 @@ class BookDetailFragment : Fragment() {
             )[ChapterViewModel::class.java]
 
             chapterVm.getLastReadOrder(bookId) { lastOrder ->
+                if (_binding == null) return@getLastReadOrder // ✅ thêm dòng này
 
                 val bundle = Bundle().apply {
                     putString("bookId", bookId)

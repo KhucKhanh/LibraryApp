@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F5F5"
+    android:background="@color/background"
     android:fillViewport="true"
     android:paddingBottom="50dp">
 
@@ -47,6 +47,7 @@
             android:text="Thống kê"
             android:textStyle="bold"
             android:textSize="15sp"
+            android:textColor="@color/text_primary"
             android:layout_marginStart="16dp"
             android:layout_marginTop="20dp"
             android:layout_marginBottom="8dp"/>
@@ -66,7 +67,7 @@
                 android:gravity="center"
                 android:padding="12dp"
                 android:layout_marginEnd="6dp"
-                android:background="@android:color/white">
+                android:background="@color/surface">
 
                 <TextView
                     android:id="@+id/txtCountReading"
@@ -74,14 +75,15 @@
                     android:layout_height="wrap_content"
                     android:text="0"
                     android:textSize="22sp"
-                    android:textStyle="bold"/>
+                    android:textStyle="bold"
+                    android:textColor="@color/text_primary"/>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Đang đọc"
                     android:textSize="11sp"
-                    android:textColor="#888888"
+                    android:textColor="@color/text_secondary"
                     android:layout_marginTop="2dp"/>
             </LinearLayout>
 
@@ -93,7 +95,7 @@
                 android:gravity="center"
                 android:padding="12dp"
                 android:layout_marginEnd="6dp"
-                android:background="@android:color/white">
+                android:background="@color/surface">
 
                 <TextView
                     android:id="@+id/txtCountRead"
@@ -101,14 +103,15 @@
                     android:layout_height="wrap_content"
                     android:text="0"
                     android:textSize="22sp"
-                    android:textStyle="bold"/>
+                    android:textStyle="bold"
+                    android:textColor="@color/text_primary"/>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Đã đọc"
                     android:textSize="11sp"
-                    android:textColor="#888888"
+                    android:textColor="@color/text_secondary"
                     android:layout_marginTop="2dp"/>
             </LinearLayout>
 
@@ -121,6 +124,7 @@
             android:text="Cài đặt"
             android:textStyle="bold"
             android:textSize="15sp"
+            android:textColor="@color/text_primary"
             android:layout_marginStart="16dp"
             android:layout_marginTop="24dp"
             android:layout_marginBottom="8dp"/>
@@ -129,7 +133,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="@android:color/white">
+            android:background="@color/surface">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -144,7 +148,8 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Nhắc nhở đọc sách"
-                    android:textSize="14sp"/>
+                    android:textSize="14sp"
+                    android:textColor="@color/text_primary"/>
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/switchNotification"
@@ -155,7 +160,7 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="0.5dp"
-                android:background="#E0E0E0"
+                android:background="@color/divider"
                 android:layout_marginHorizontal="16dp"/>
 
             <LinearLayout
@@ -171,7 +176,8 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Chủ đề tối"
-                    android:textSize="14sp"/>
+                    android:textSize="14sp"
+                    android:textColor="@color/text_primary"/>
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/switchDarkMode"
@@ -188,6 +194,7 @@
             android:text="Tài khoản"
             android:textStyle="bold"
             android:textSize="15sp"
+            android:textColor="@color/text_primary"
             android:layout_marginStart="16dp"
             android:layout_marginTop="24dp"
             android:layout_marginBottom="8dp"/>
@@ -196,7 +203,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="@android:color/white">
+            android:background="@color/surface">
 
             <LinearLayout
                 android:id="@+id/btnEditProfile"
@@ -213,20 +220,21 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Chỉnh sửa thông tin"
-                    android:textSize="14sp"/>
+                    android:textSize="14sp"
+                    android:textColor="@color/text_primary"/>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="›"
                     android:textSize="18sp"
-                    android:textColor="#CCCCCC"/>
+                    android:textColor="@color/text_secondary"/>
             </LinearLayout>
 
             <View
                 android:layout_width="match_parent"
                 android:layout_height="0.5dp"
-                android:background="#E0E0E0"
+                android:background="@color/divider"
                 android:layout_marginHorizontal="16dp"/>
 
             <LinearLayout
@@ -244,20 +252,21 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Đổi mật khẩu"
-                    android:textSize="14sp"/>
+                    android:textSize="14sp"
+                    android:textColor="@color/text_primary"/>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="›"
                     android:textSize="18sp"
-                    android:textColor="#CCCCCC"/>
+                    android:textColor="@color/text_secondary"/>
             </LinearLayout>
 
             <View
                 android:layout_width="match_parent"
                 android:layout_height="0.5dp"
-                android:background="#E0E0E0"
+                android:background="@color/divider"
                 android:layout_marginHorizontal="16dp"/>
 
             <LinearLayout

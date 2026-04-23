@@ -16,6 +16,19 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
+        val sharedPref = getSharedPreferences("settings", android.content.Context.MODE_PRIVATE)
+        val isDarkMode = sharedPref.getBoolean("dark_mode", false)
+        if (isDarkMode) {
+            androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(
+                androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
+            )
+        } else {
+            androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(
+                androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
+            )
+        }
+
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_main)
@@ -34,7 +47,6 @@ class MainActivity : AppCompatActivity() {
 
         navController.graph = graph
 
-
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNav)
 
         bottomNav.setupWithNavController(navController)
@@ -48,12 +60,13 @@ class MainActivity : AppCompatActivity() {
         navController.addOnDestinationChangedListener { _, destination, _ ->
             val shouldHideBottom =
                 destination.id == R.id.loginFragment ||
-                        destination.id == R.id.registerFragment ||
-                        destination.id == R.id.chapterReaderFragment
-
+                destination.id == R.id.registerFragment ||
+                destination.id == R.id.chapterReaderFragment ||
+                destination.id == R.id.forgotPasswordFragment
             val shouldHideChat =
                 destination.id == R.id.loginFragment ||
-                        destination.id == R.id.registerFragment
+                destination.id == R.id.registerFragment ||
+                destination.id == R.id.forgotPasswordFragment
 
             bottomNav.visibility = if (shouldHideBottom) View.GONE else View.VISIBLE
             btnChat.visibility = if (shouldHideChat) View.GONE else View.VISIBLE
