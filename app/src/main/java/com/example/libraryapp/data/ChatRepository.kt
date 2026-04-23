@@ -15,10 +15,10 @@ class ChatRepository(
         userId: String,
         chatId: String,
         messages: List<MessageRequest>,
-        userText: String
+        userText: String,
+        isFirstMessage: Boolean  // ✅ thêm param này
     ): String {
         return try {
-
             Log.d("AI_REQUEST", messages.toString())
 
             val request = GroqRequest(
@@ -33,37 +33,32 @@ class ChatRepository(
 
             val aiText = response.choices.first().message.content
 
-            firebaseRepo.saveMessage(
-                userId,
-                chatId,
-                Message(userText, true)
-            )
+            // ✅ Nếu là tin đầu tiên thì tạo metadata
+            if (isFirstMessage) {
+                firebaseRepo.createChatMetadata(userId, chatId, userText)
+            } else {
+                firebaseRepo.updateLastMessage(userId, chatId, userText)
+            }
 
-            firebaseRepo.saveMessage(
-                userId,
-                chatId,
-                Message(aiText, false)
-            )
+            firebaseRepo.saveMessage(userId, chatId, Message(userText, true))
+            firebaseRepo.saveMessage(userId, chatId, Message(aiText, false))
+
             Log.d("GROQ_REQUEST", request.toString())
-
             aiText
 
         } catch (e: Exception) {
             val errorText = "Error: ${e.message}"
-
-            firebaseRepo.saveMessage(
-                userId,
-                chatId,
-                Message(userText, true)
-            )
-
-            firebaseRepo.saveMessage(
-                userId,
-                chatId,
-                Message(errorText, false)
-            )
-
+            firebaseRepo.saveMessage(userId, chatId, Message(userText, true))
+            firebaseRepo.saveMessage(userId, chatId, Message(errorText, false))
             errorText
         }
+    }
+
+    fun loadChatHistory(userId: String, chatId: String, onResult: (List<Message>) -> Unit) {
+        firebaseRepo.loadChatHistory(userId, chatId, onResult)
+    }
+
+    fun loadChatList(userId: String, onResult: (List<Chat>) -> Unit) {
+        firebaseRepo.loadChatList(userId, onResult)
     }
 }

@@ -55,12 +55,10 @@ class HomeFragment : Fragment() {
 
         }
 
-        // ===== Adapters =====
         adapter = BookAdapter(emptyList(), onBookClick)
         recommendedAdapter = BookAdapter(emptyList(), onBookClick)
         recentAdapter = BookAdapter(emptyList(), onBookClick)
 
-        // ===== RecyclerViews =====
         binding.rvBooks.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         binding.rvBooks.adapter = adapter

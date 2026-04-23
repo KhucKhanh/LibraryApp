@@ -1,34 +1,143 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="400dp"
-    android:orientation="vertical"
-    android:background="@android:color/white"
-    android:padding="8dp">
+    android:layout_height="500dp"
+    android:background="@android:color/white">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvChat"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"/>
-
+    <!-- ====== MÀN HÌNH CHAT ====== -->
     <LinearLayout
+        android:id="@+id/panelChat"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="8dp">
 
-        <EditText
-            android:id="@+id/edtMessage"
-            android:layout_width="0dp"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:hint="Nhập tin nhắn"/>
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingBottom="8dp">
 
-        <Button
-            android:id="@+id/btnSend"
-            android:layout_width="wrap_content"
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Trợ lý AI"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#1976D2"/>
+
+            <Button
+                android:id="@+id/btnHistory"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Lịch sử"
+                android:textSize="12sp"
+                android:backgroundTint="#757575"/>
+
+            <Button
+                android:id="@+id/btnNewChat"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Mới"
+                android:textSize="12sp"
+                android:layout_marginStart="4dp"
+                android:backgroundTint="#1976D2"/>
+
+            <Button
+                android:id="@+id/btnMinimize"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="—"
+                android:textSize="12sp"
+                android:layout_marginStart="4dp"
+                android:backgroundTint="#BDBDBD"/>
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E0E0E0"
+            android:layout_marginBottom="4dp"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvChat"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Gửi"/>
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/edtMessage"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="Nhập tin nhắn"/>
+
+            <Button
+                android:id="@+id/btnSend"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Gửi"/>
+
+        </LinearLayout>
+
     </LinearLayout>
 
-</LinearLayout>
+    <!-- ====== MÀN HÌNH LỊCH SỬ ====== -->
+    <LinearLayout
+        android:id="@+id/panelHistory"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="8dp"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingBottom="8dp">
+
+            <Button
+                android:id="@+id/btnBackToChat"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="← Back"
+                android:textSize="12sp"
+                android:backgroundTint="#757575"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Lịch sử chat"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#1976D2"
+                android:gravity="center"/>
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E0E0E0"
+            android:layout_marginBottom="4dp"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvChatList"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+
+    </LinearLayout>
+
+</FrameLayout>
