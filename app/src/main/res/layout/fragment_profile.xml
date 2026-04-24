@@ -135,6 +135,7 @@
             android:orientation="vertical"
             android:background="@color/surface">
 
+            <!-- Thay thế row "Nhắc nhở đọc sách" bằng đoạn này -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -143,18 +144,37 @@
                 android:paddingHorizontal="16dp"
                 android:paddingVertical="14dp">
 
-                <TextView
+                <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Nhắc nhở đọc sách"
-                    android:textSize="14sp"
-                    android:textColor="@color/text_primary"/>
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Nhắc nhở đọc sách"
+                        android:textSize="14sp"
+                        android:textColor="@color/text_primary"/>
+
+                    <!-- THÊM MỚI: hiển thị giờ đang đặt -->
+                    <TextView
+                        android:id="@+id/txtReminderTime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Nhắc lúc 08:00"
+                        android:textSize="11sp"
+                        android:textColor="@color/text_secondary"
+                        android:layout_marginTop="2dp"
+                        android:visibility="gone"/>
+
+                </LinearLayout>
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/switchNotification"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
+
             </LinearLayout>
 
             <View
