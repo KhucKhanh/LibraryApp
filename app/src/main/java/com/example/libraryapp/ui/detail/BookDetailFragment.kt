@@ -75,7 +75,7 @@ class BookDetailFragment : Fragment() {
         }
 
         libraryRepo.isBookInLibrary("liked", bookId) { liked ->
-            if (_binding == null) return@isBookInLibrary // ✅ thêm dòng này
+            if (_binding == null) return@isBookInLibrary
 
             isLiked = liked
 
@@ -89,7 +89,7 @@ class BookDetailFragment : Fragment() {
 
             libraryRepo.toggleLiked(bookId) { liked ->
 
-                if (_binding == null) return@toggleLiked // ✅ thêm dòng này
+                if (_binding == null) return@toggleLiked
 
                 isLiked = liked
 
@@ -139,7 +139,7 @@ class BookDetailFragment : Fragment() {
             )[ChapterViewModel::class.java]
 
             chapterVm.getLastReadOrder(bookId) { lastOrder ->
-                if (_binding == null) return@getLastReadOrder // ✅ thêm dòng này
+                if (_binding == null) return@getLastReadOrder
 
                 val bundle = Bundle().apply {
                     putString("bookId", bookId)
@@ -157,6 +157,25 @@ class BookDetailFragment : Fragment() {
                     bundle
                 )
             }
+        }
+
+        binding.btnBack.setOnClickListener {
+            findNavController().popBackStack()
+        }
+
+        binding.btnReadFromStart.setOnClickListener {
+            val bundle = Bundle().apply {
+                putString("bookId", bookId)
+                putInt("order", 0)
+                putString("category", category)
+                putString("title", title)
+                putString("author", author)
+                putString("description", description)
+            }
+            findNavController().navigate(
+                R.id.action_bookDetailFragment_to_chapterReaderFragment,
+                bundle
+            )
         }
     }
 

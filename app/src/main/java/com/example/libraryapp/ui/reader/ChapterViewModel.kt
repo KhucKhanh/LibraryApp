@@ -56,9 +56,6 @@ class ChapterViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    // ───────────────────────────────────────────
-    // Lưu vị trí đọc lên Firestore
-    // ───────────────────────────────────────────
     fun saveReadingPosition(bookId: String, order: Int, scrollY: Int) {
         val uid = getUid() ?: return
 
@@ -76,9 +73,6 @@ class ChapterViewModel(application: Application) : AndroidViewModel(application)
             )
     }
 
-    // ───────────────────────────────────────────
-    // Lấy scroll position của chapter (từ Firestore, callback)
-    // ───────────────────────────────────────────
     fun getScrollForChapter(bookId: String, order: Int, onResult: (Int) -> Unit) {
         val uid = getUid() ?: run { onResult(0); return }
 
@@ -96,9 +90,6 @@ class ChapterViewModel(application: Application) : AndroidViewModel(application)
             }
     }
 
-    // ───────────────────────────────────────────
-    // Lấy chapter cuối cùng đã đọc (từ Firestore, callback)
-    // ───────────────────────────────────────────
     fun getLastReadOrder(bookId: String, onResult: (Int) -> Unit) {
         val uid = getUid() ?: run { onResult(1); return }
 
@@ -123,4 +114,12 @@ class ChapterViewModel(application: Application) : AndroidViewModel(application)
         return current.order == list.lastOrNull()?.order
     }
 
+    fun isFirstChapter(): Boolean {
+        return currentIndex == 0
+    }
+
+    fun hasNextChapter(): Boolean {
+        val list = chapters.value ?: return false
+        return currentIndex < list.size - 1
+    }
 }

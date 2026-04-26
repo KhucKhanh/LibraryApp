@@ -52,6 +52,9 @@ class LibraryDetailFragment : Fragment() {
 
             repo.getLibraries { libs ->
 
+                if (_binding == null) return@getLibraries
+
+
                 val liked = libs.find { it.id == "liked" }
                 likedIds = liked?.books?.toMutableSet() ?: mutableSetOf()
 
@@ -77,6 +80,8 @@ class LibraryDetailFragment : Fragment() {
                     },
                     onToggleLike = { book ->
                         repo.toggleLiked(book.id) { newState ->
+                            if (_binding == null) return@toggleLiked
+
                             if (newState) likedIds.add(book.id)
                             else likedIds.remove(book.id)
 

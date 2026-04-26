@@ -36,12 +36,8 @@ class SearchFragment : Fragment() {
         viewModel = ViewModelProvider(requireActivity())[SearchViewModel::class.java]
 
         adapter = BookAdapter(emptyList()) { book ->
-
             val bookId = book.id ?: return@BookAdapter
-
             Log.d("SEARCH", "Navigating with bookId = $bookId")
-
-
             val bundle = Bundle().apply {
                 putString("bookId", bookId)
                 putString("title", book.title ?: "")
@@ -50,32 +46,31 @@ class SearchFragment : Fragment() {
                 putString("imageUrl", book.imageUrl ?: "")
                 putString("category", book.category ?: "")
             }
-
-            findNavController().navigate(
-                R.id.action_searchFragment_to_bookDetailFragment,
-                bundle
-            )
+            findNavController().navigate(R.id.action_searchFragment_to_bookDetailFragment, bundle)
         }
 
         binding.rvBooks.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-
         binding.rvBooks.adapter = adapter
 
         viewModel.books.observe(viewLifecycleOwner) { list ->
             adapter.updateData(list)
-
             val query = binding.edtSearch.text.toString().trim()
             binding.txtEmpty.visibility =
-                if (list.isEmpty() && query.isNotEmpty())
-                    View.VISIBLE
-                else
-                    View.GONE
+                if (list.isEmpty() && query.isNotEmpty()) View.VISIBLE else View.GONE
+        }
+
+        // ✅ Restore lại text cũ từ ViewModel (không trigger TextWatcher)
+        val savedQuery = viewModel.currentQuery
+        if (savedQuery.isNotEmpty()) {
+            binding.edtSearch.setText(savedQuery)
+            binding.edtSearch.setSelection(savedQuery.length) // đặt cursor cuối
         }
 
         binding.edtSearch.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
                 val query = s.toString().trim()
+                viewModel.currentQuery = query // ✅ lưu query vào ViewModel
 
                 job?.cancel()
                 job = CoroutineScope(Dispatchers.Main).launch {
@@ -83,14 +78,14 @@ class SearchFragment : Fragment() {
                     viewModel.searchBooks(query)
                 }
             }
-
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
 
-        viewModel.getAllBooks()
-
-
+        // ✅ Chỉ load all books nếu chưa có data và không có query
+        if (viewModel.books.value.isNullOrEmpty() && viewModel.currentQuery.isEmpty()) {
+            viewModel.getAllBooks()
+        }
     }
 
     override fun onDestroyView() {

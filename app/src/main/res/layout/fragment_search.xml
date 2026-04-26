@@ -46,9 +46,12 @@
             android:drawableStart="@android:drawable/ic_menu_search"
             android:drawablePadding="8dp"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
             android:textColor="#000000"
-            android:textColorHint="#888888"/>
+            android:textColorHint="#888888"
+            android:inputType="textMultiLine"
+            android:gravity="top"/>
 
     </LinearLayout>
 

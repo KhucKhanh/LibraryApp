@@ -1,6 +1,7 @@
 package com.example.libraryapp.ui.reader
 
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -10,6 +11,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.example.libraryapp.ai.AIContextManager
 import com.example.libraryapp.model.Book
+import com.example.libraryapp.utils.BookTTSManager
+
 
 class ChapterReaderFragment : Fragment() {
 
@@ -29,6 +32,9 @@ class ChapterReaderFragment : Fragment() {
     private var author: String? = null
     private var description: String? = null
 
+    private lateinit var ttsManager: BookTTSManager
+    private var isReading = false
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -47,6 +53,9 @@ class ChapterReaderFragment : Fragment() {
         title = arguments?.getString("title")
         author = arguments?.getString("author")
         description = arguments?.getString("description")
+
+        ttsManager = BookTTSManager(requireContext())
+
 
         viewModel = ViewModelProvider(
             this,
@@ -94,6 +103,8 @@ class ChapterReaderFragment : Fragment() {
         }
 
         binding.btnNext.setOnClickListener {
+            stopReading()
+            ttsManager.resetPosition()
             viewModel.nextChapter()
 
             // 🔥 +3 (FINISH BOOK)
@@ -104,6 +115,8 @@ class ChapterReaderFragment : Fragment() {
         }
 
         binding.btnPrev.setOnClickListener {
+            stopReading()
+            ttsManager.resetPosition()
             viewModel.prevChapter()
         }
 
@@ -112,11 +125,16 @@ class ChapterReaderFragment : Fragment() {
                 ?: return@setOnScrollChangeListener
             viewModel.saveReadingPosition(bookId, currentOrder, scrollY)
         }
-    }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+        binding.btnListen.setOnClickListener {
+            Log.d("TTS", "Nút bấm - isReading=$isReading")
+
+            if (isReading) {
+                stopReading()
+            } else {
+                startReading()
+            }
+        }
     }
 
     private fun saveRecentBook(bookId: String, chapterOrder: Int?) {
@@ -137,4 +155,35 @@ class ChapterReaderFragment : Fragment() {
             .set(data)
     }
 
+    private fun startReading() {
+        if (_binding == null) return
+        val content = viewModel.currentChapter.value?.content ?: return
+
+        isReading = true
+        binding.btnListen.text = "⏸ Dừng"
+
+        ttsManager.read(content) {
+            requireActivity().runOnUiThread {
+                if (!isReading || _binding == null) return@runOnUiThread
+
+                if (viewModel.hasNextChapter()) {
+                    viewModel.nextChapter()
+                    binding.root.postDelayed({ startReading() }, 300)
+                } else {
+                    stopReading()
+                }
+            }
+        }
+    }
+
+    private fun stopReading() {
+        isReading = false
+        ttsManager.stop()
+        binding.btnListen.text = "▶ Nghe"
+    }
+    override fun onDestroyView() {
+        super.onDestroyView()
+        ttsManager.shutdown()
+        _binding = null
+    }
 }

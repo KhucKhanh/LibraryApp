@@ -8,6 +8,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 class SearchViewModel : ViewModel() {
 
     private val db = FirebaseFirestore.getInstance()
+    var currentQuery: String = ""
 
     val books = MutableLiveData<List<Book>>()
 

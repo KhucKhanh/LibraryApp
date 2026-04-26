@@ -43,18 +43,21 @@ class LibraryRepository {
     }
 
     fun getLibraries(callback: (List<Library>) -> Unit) {
-
         libRef().get().addOnSuccessListener { result ->
-
             val libraries = result.map {
                 Library(
                     id = it.id,
                     name = it.getString("name") ?: "",
-                    books = it.get("books") as? List<String> ?: emptyList()
+                    books = it.get("books") as? List<String> ?: emptyList(),
+                    createdAt = it.getTimestamp("createdAt")?.seconds ?: 0L // THÊM
                 )
             }
 
-            callback(libraries)
+            val sorted = libraries.sortedWith(
+                compareByDescending<Library> { it.id == "liked" }
+                    .thenBy { it.createdAt }
+            )
+            callback(sorted)
         }
     }
 
@@ -104,6 +107,36 @@ class LibraryRepository {
                 val list = doc.get("books") as? List<String> ?: emptyList()
                 callback(list.contains(bookId))
             }
+    }
+
+    fun createLibrary(name: String, callback: (Boolean) -> Unit) {
+        val newDoc = libRef().document() // auto-generate ID
+        newDoc.set(
+            mapOf(
+                "name" to name,
+                "books" to emptyList<String>(),
+                "system" to false,
+                "createdAt" to com.google.firebase.Timestamp.now()
+            )
+        ).addOnSuccessListener {
+            callback(true)
+        }.addOnFailureListener {
+            callback(false)
+        }
+    }
+
+    fun deleteLibrary(libraryId: String, callback: (Boolean) -> Unit) {
+        libRef().document(libraryId)
+            .delete()
+            .addOnSuccessListener { callback(true) }
+            .addOnFailureListener { callback(false) }
+    }
+
+    fun renameLibrary(libraryId: String, newName: String, callback: (Boolean) -> Unit) {
+        libRef().document(libraryId)
+            .update("name", newName)
+            .addOnSuccessListener { callback(true) }
+            .addOnFailureListener { callback(false) }
     }
 
 }

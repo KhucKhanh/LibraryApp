@@ -15,7 +15,6 @@ object AIContextManager {
 
         val book = currentBook
 
-        // 🔥 LỌC SÁCH LIÊN QUAN (QUAN TRỌNG NHẤT)
         val relevantBooks = allBooks
             .filter {
                 it.category == lastSelectedBook?.category
