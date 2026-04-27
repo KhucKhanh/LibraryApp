@@ -33,7 +33,8 @@ class LibraryRepository {
                                 id = it.id,
                                 title = it.getString("title") ?: "",
                                 author = it.getString("author") ?: "",
-                                imageUrl = it.getString("imageUrl") ?: ""
+                                imageUrl = it.getString("imageUrl") ?: "",
+                                description = it.getString("description") ?: ""
                             )
                         }
 

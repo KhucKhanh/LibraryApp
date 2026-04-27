@@ -3,6 +3,7 @@ package com.example.libraryapp.ui.home
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.libraryapp.ai.AIContextManager
 import com.example.libraryapp.model.Book
 import com.example.libraryapp.recommendation.HybridRecommendationEngine
 import com.google.firebase.auth.FirebaseAuth
@@ -31,6 +32,7 @@ class HomeViewModel : ViewModel() {
                     book?.copy(id = doc.id) ?: Book(id = doc.id)
                 }
                 books.value = list
+                AIContextManager.allBooks = list
             }
     }
 

@@ -26,6 +26,8 @@ object SimpleRAGEngine {
 
         val chunks = FirestoreRAGRepository.getChunks(bookId, chapter)
 
+        android.util.Log.d("RAG_DEBUG", "Chunks fetched: ${chunks.size}")
+
         if (chunks.isEmpty()) return ""
 
         val queryVector = EmbeddingClient.embed(query)

@@ -11,4 +11,17 @@ object AIContextManager {
     var allBooks: List<Book> = emptyList()
     var lastSelectedBook: Book? = null
 
+    data class Snapshot(
+        val screen: String,
+        val book: Book?,
+        val chapter: String?,
+        val chapterContent: String?
+    )
+
+    fun snapshot(): Snapshot = Snapshot(
+        screen = currentScreen,
+        book = currentBook,
+        chapter = currentChapter,
+        chapterContent = currentChapterContent
+    )
 }

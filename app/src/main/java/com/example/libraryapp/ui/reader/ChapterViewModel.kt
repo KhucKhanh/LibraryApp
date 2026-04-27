@@ -1,6 +1,7 @@
 package com.example.libraryapp.ui.reader
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import com.example.libraryapp.model.Chapter
@@ -20,9 +21,9 @@ class ChapterViewModel(application: Application) : AndroidViewModel(application)
     private fun getUid(): String? = auth.currentUser?.uid
 
     // ───────────────────────────────────────────
-    // Load chapters + nhảy đúng chapter
+    // LOAD CHAPTERS
     // ───────────────────────────────────────────
-    fun loadChapters(bookId: String, startOrder: Int = 1) {
+    fun loadChapters(bookId: String, startOrder: Int = 0) {
         db.collection("books")
             .document(bookId)
             .collection("chapters")
@@ -36,6 +37,10 @@ class ChapterViewModel(application: Application) : AndroidViewModel(application)
                     val index = list.indexOfFirst { it.order == startOrder }
                     currentIndex = if (index != -1) index else 0
                     currentChapter.value = list[currentIndex]
+
+                    // 🔥 luôn lưu recent + progress (kể cả = 0)
+                    saveRecentBook(bookId, currentIndex)
+                    saveReadingPosition(bookId, currentIndex, 0)
                 }
             }
     }
@@ -56,6 +61,9 @@ class ChapterViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    // ───────────────────────────────────────────
+    // SAVE PROGRESS
+    // ───────────────────────────────────────────
     fun saveReadingPosition(bookId: String, order: Int, scrollY: Int) {
         val uid = getUid() ?: return
 
@@ -65,7 +73,7 @@ class ChapterViewModel(application: Application) : AndroidViewModel(application)
             .document(bookId)
             .set(
                 mapOf(
-                    "lastOrder" to order,
+                    "lastChapterOrder" to order,   // 🔥 unified name
                     "chapter_${order}_scrollY" to scrollY,
                     "updatedAt" to System.currentTimeMillis()
                 ),
@@ -73,6 +81,9 @@ class ChapterViewModel(application: Application) : AndroidViewModel(application)
             )
     }
 
+    // ───────────────────────────────────────────
+    // GET SCROLL
+    // ───────────────────────────────────────────
     fun getScrollForChapter(bookId: String, order: Int, onResult: (Int) -> Unit) {
         val uid = getUid() ?: run { onResult(0); return }
 
@@ -90,8 +101,11 @@ class ChapterViewModel(application: Application) : AndroidViewModel(application)
             }
     }
 
+    // ───────────────────────────────────────────
+    // GET LAST READ (FIX -1)
+    // ───────────────────────────────────────────
     fun getLastReadOrder(bookId: String, onResult: (Int) -> Unit) {
-        val uid = getUid() ?: run { onResult(1); return }
+        val uid = getUid() ?: run { onResult(-1); return }
 
         db.collection("users")
             .document(uid)
@@ -99,44 +113,47 @@ class ChapterViewModel(application: Application) : AndroidViewModel(application)
             .document(bookId)
             .get()
             .addOnSuccessListener { doc ->
-                val lastOrder = doc.getLong("lastOrder")?.toInt() ?: 1
+                val lastOrder = doc.getLong("lastChapterOrder")?.toInt() ?: -1
+                Log.d("DEBUG_BOOK", "lastOrder = $lastOrder")
                 onResult(lastOrder)
             }
             .addOnFailureListener {
-                onResult(1)
+                onResult(-1)
             }
     }
 
-    fun isLastChapter(): Boolean {
-        val list = chapters.value ?: return false
-        val current = currentChapter.value ?: return false
-
-        return current.order == list.lastOrNull()?.order
-    }
-
-    fun isFirstChapter(): Boolean {
-        return currentIndex == 0
-    }
-
-    fun hasNextChapter(): Boolean {
-        val list = chapters.value ?: return false
-        return currentIndex < list.size - 1
-    }
-
-    // Thêm vào ChapterViewModel.kt
+    // ───────────────────────────────────────────
+    // RECENT BOOK (FIX)
+    // ───────────────────────────────────────────
     fun saveRecentBook(bookId: String, chapterOrder: Int) {
-        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val uid = getUid() ?: return
+
         val data = hashMapOf(
             "bookId" to bookId,
-            "lastChapterId" to chapterOrder,
+            "lastChapterOrder" to chapterOrder, // 🔥 same field
             "timestamp" to System.currentTimeMillis()
         )
-        FirebaseFirestore.getInstance()
-            .collection("users")
+
+        db.collection("users")
             .document(uid)
             .collection("recentBooks")
             .document(bookId)
             .set(data)
     }
 
+    // ───────────────────────────────────────────
+    // HELPER
+    // ───────────────────────────────────────────
+    fun isLastChapter(): Boolean {
+        val list = chapters.value ?: return false
+        val current = currentChapter.value ?: return false
+        return current.order == list.lastOrNull()?.order
+    }
+
+    fun isFirstChapter(): Boolean = currentIndex == 0
+
+    fun hasNextChapter(): Boolean {
+        val list = chapters.value ?: return false
+        return currentIndex < list.size - 1
+    }
 }

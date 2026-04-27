@@ -1,10 +1,7 @@
 package com.example.libraryapp.data.remote
 
+import android.util.Log
 import com.example.libraryapp.BuildConfig
-import com.example.libraryapp.data.remote.GeminiContent
-import com.example.libraryapp.data.remote.GeminiEmbeddingClient
-import com.example.libraryapp.data.remote.GeminiEmbeddingRequest
-import com.example.libraryapp.data.remote.GeminiPart
 
 object EmbeddingClient {
 
@@ -16,13 +13,16 @@ object EmbeddingClient {
                 apiKey = API_KEY,
                 request = GeminiEmbeddingRequest(
                     content = GeminiContent(
-                        parts = listOf(GeminiPart(text = text.take(8000)))
+                        parts = listOf(GeminiPart(text = text.take(3000)))
                     )
                 )
             )
             response.embedding.values
+
         } catch (e: Exception) {
-            null // fallback về Jaccard nếu lỗi
+            Log.e("RAG_DEBUG", "Embedding error: ${e.message}")
+            e.printStackTrace()
+            return null
         }
     }
 }

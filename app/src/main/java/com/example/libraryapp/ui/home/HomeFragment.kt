@@ -93,7 +93,6 @@ class HomeFragment : Fragment() {
 
         viewModel.books.observe(viewLifecycleOwner) { books ->
             adapter.updateData(books)
-            AIContextManager.allBooks = books
             AIContextManager.currentScreen = "Home"
         }
 

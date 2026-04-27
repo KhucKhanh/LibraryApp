@@ -14,9 +14,8 @@ import com.example.libraryapp.model.Message
 import com.example.libraryapp.model.MessageRequest
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.example.libraryapp.ai.AIContextManager
-import com.example.libraryapp.ai.AIPromptBuilder
 import androidx.lifecycle.lifecycleScope
-import com.example.libraryapp.ai.usecase.AskChapterUseCase
+import com.example.libraryapp.ai.ScreenPromptBuilder
 import kotlinx.coroutines.launch
 
 
@@ -85,19 +84,23 @@ class ChatBottomSheet : BottomSheetDialogFragment() {
             if (text.isEmpty()) return@setOnClickListener
 
             val isFirstMessage = messages.isEmpty()
+
             messages.add(Message(text, true))
             chatAdapter.notifyItemInserted(messages.size - 1)
             binding.rvChat.scrollToPosition(messages.size - 1)
             binding.edtMessage.text.clear()
 
+            // 🔥 LẤY CONTEXT MỚI MỖI LẦN (QUAN TRỌNG)
+            val contextSnapshot = AIContextManager.snapshot()
+
             viewLifecycleOwner.lifecycleScope.launch {
-                val contextPrompt = AIPromptBuilder.build(text)
+
+                // 🔥 BUILD PROMPT CÓ RAG
+                val systemPrompt = ScreenPromptBuilder.build(contextSnapshot, text)
 
                 val requestMessages = mutableListOf<MessageRequest>()
-                requestMessages.add(MessageRequest(role = "system", content = contextPrompt))
-                requestMessages.add(
-                    MessageRequest(role = "user", content = text)
-                )
+                requestMessages.add(MessageRequest(role = "system", content = systemPrompt))
+                requestMessages.add(MessageRequest(role = "user", content = text))
 
                 viewModel.sendMessage(
                     userId = userId,

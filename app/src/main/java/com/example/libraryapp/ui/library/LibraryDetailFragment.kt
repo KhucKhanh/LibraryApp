@@ -68,6 +68,7 @@ class LibraryDetailFragment : Fragment() {
                             putString("title", book.title)
                             putString("author", book.author)
                             putString("imageUrl", book.imageUrl)
+                            putString("description", book.description)
                         }
 
                         findNavController().navigate(
