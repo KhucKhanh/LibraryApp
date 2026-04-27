@@ -6,6 +6,11 @@ import com.example.libraryapp.ai.usecase.*
 object AIPromptBuilder {
 
     suspend fun build(userMessage: String): String {
+
+        if (AIContextManager.currentScreen == "ChapterReader") {
+            return AskChapterUseCase.buildPrompt(userMessage)
+        }
+
         val intent = AIIntentDetector.detect(userMessage)
         return when (intent) {
             Intent.SUMMARIZE_BOOK  -> SummarizeBookUseCase.buildPrompt(userMessage)

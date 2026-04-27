@@ -1,6 +1,7 @@
 package com.example.libraryapp.ui.home
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -85,7 +86,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun setupViewModel() {
-        viewModel = ViewModelProvider(this)[HomeViewModel::class.java]
+        viewModel = ViewModelProvider(requireActivity())[HomeViewModel::class.java]
 
         viewModel.loadRecommendations()
         viewModel.loadRecentBooks()
@@ -97,6 +98,8 @@ class HomeFragment : Fragment() {
         }
 
         viewModel.recommendedBooks.observe(viewLifecycleOwner) { books ->
+            books.forEach { Log.d("RECOMMEND", "${it.title} | ${it.category}") }
+            recommendedAdapter.updateData(books)
             recommendedAdapter.updateData(books)
         }
 

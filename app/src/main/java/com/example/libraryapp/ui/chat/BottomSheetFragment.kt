@@ -91,9 +91,7 @@ class ChatBottomSheet : BottomSheetDialogFragment() {
             binding.edtMessage.text.clear()
 
             viewLifecycleOwner.lifecycleScope.launch {
-//                val contextPrompt = AIPromptBuilder.build(text)
-
-                val contextPrompt = AskChapterUseCase.buildPrompt(text)
+                val contextPrompt = AIPromptBuilder.build(text)
 
                 val requestMessages = mutableListOf<MessageRequest>()
                 requestMessages.add(MessageRequest(role = "system", content = contextPrompt))

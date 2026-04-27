@@ -1,5 +1,6 @@
 package com.example.libraryapp.ai
 
+import com.example.libraryapp.data.remote.EmbeddingClient
 import kotlin.math.sqrt
 
 object SimpleRAGEngine {

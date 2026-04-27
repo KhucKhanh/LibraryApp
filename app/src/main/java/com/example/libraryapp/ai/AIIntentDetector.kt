@@ -19,7 +19,9 @@ object AIIntentDetector {
 
             lower.containsAny(
                 "chương này", "đoạn này", "giải thích",
-                "nội dung vừa đọc", "đoạn vừa rồi"
+                "nội dung vừa đọc", "đoạn vừa rồi",
+                "chương", "tác giả nói gì", "sách này nói",
+                "nội dung", "bài này", "phần này"
             ) -> Intent.ASK_CHAPTER
 
             lower.containsAny(

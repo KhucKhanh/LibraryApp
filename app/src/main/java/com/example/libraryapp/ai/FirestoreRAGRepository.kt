@@ -1,5 +1,6 @@
 package com.example.libraryapp.ai
 
+import com.example.libraryapp.data.remote.EmbeddingClient
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 

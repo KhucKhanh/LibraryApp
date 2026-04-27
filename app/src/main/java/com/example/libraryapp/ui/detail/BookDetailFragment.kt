@@ -46,7 +46,6 @@ class BookDetailFragment : Fragment() {
 
         Log.d("BOOK_DETAIL", "bookId = $bookId")
 
-        // Khởi tạo book object từ arguments
         book = Book(
             id = bookId,
             title = arguments?.getString("title") ?: "No title",
@@ -69,6 +68,7 @@ class BookDetailFragment : Fragment() {
         }
         viewModel.loadChapters(bookId)
 
+        // +1: Mở trang detail → xem qua
         if (book.category.isNotEmpty()) {
             RecommendationUtils.addCategoryScore(book.category, 1)
         }
@@ -103,6 +103,11 @@ class BookDetailFragment : Fragment() {
                 if (_binding == null) return@toggleLiked
                 isLiked = liked
                 updateFavoriteIcon()
+
+                // +4: Like sách → yêu thích
+                if (liked) {
+                    RecommendationUtils.addCategoryScore(book.category, 4)
+                }
             }
         }
     }
@@ -116,10 +121,8 @@ class BookDetailFragment : Fragment() {
 
     private fun setupChapterList() {
         val chapterAdapter = ChapterAdapter(emptyList()) { chapter ->
-            // Cập nhật AI context trước khi navigate
             AIContextManager.currentChapter = chapter.title
             AIContextManager.currentScreen = "ChapterReader"
-
             navigateToReader(order = chapter.order, chapterTitle = chapter.title)
         }
 
@@ -155,7 +158,6 @@ class BookDetailFragment : Fragment() {
         }
     }
 
-    // Navigate với đầy đủ thông tin — dùng book object thay vì truyền từng field
     private fun navigateToReader(order: Int, chapterTitle: String? = null) {
         val bundle = Bundle().apply {
             putString("bookId", book.id)
@@ -205,7 +207,11 @@ class BookDetailFragment : Fragment() {
                         val alreadyIn = lib.books.contains(bookId)
                         val shouldBeIn = checkedItems[index]
                         when {
-                            shouldBeIn && !alreadyIn -> libraryRepo.addBookToLibrary(lib.id, bookId)
+                            shouldBeIn && !alreadyIn -> {
+                                libraryRepo.addBookToLibrary(lib.id, bookId)
+                                // +4: Thêm vào thư viện → yêu thích
+                                RecommendationUtils.addCategoryScore(book.category, 4)
+                            }
                             !shouldBeIn && alreadyIn -> libraryRepo.removeBook(lib.id, bookId)
                         }
                     }

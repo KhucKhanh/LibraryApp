@@ -18,7 +18,7 @@ if (localFile.exists()) {
 }
 
 val apiKey = localProperties.getProperty("GROQ_API_KEY") ?: ""
-
+val geminiApiKey = localProperties.getProperty("GEMINI_API_KEY") ?: ""
 
 android {
     namespace = "com.example.libraryapp"
@@ -37,6 +37,12 @@ android {
             "String",
             "GROQ_API_KEY",
             "\"$apiKey\""
+        )
+
+        buildConfigField(
+            "String",
+            "GEMINI_API_KEY",
+            "\"$geminiApiKey\""
         )
 
     }

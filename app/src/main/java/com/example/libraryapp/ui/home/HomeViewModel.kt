@@ -1,8 +1,10 @@
 package com.example.libraryapp.ui.home
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.libraryapp.model.Book
+import com.example.libraryapp.recommendation.HybridRecommendationEngine
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
@@ -17,12 +19,9 @@ class HomeViewModel : ViewModel() {
     val recommendedBooks = MutableLiveData<List<Book>>()
 
     init {
-        loadBooks() // 🔥 chỉ load ở đây
+        loadBooks()
     }
 
-    // =========================
-    // 🔥 LOAD ALL BOOKS
-    // =========================
     private fun loadBooks() {
         db.collection("books")
             .get()
@@ -56,7 +55,6 @@ class HomeViewModel : ViewModel() {
                     .whereIn(FieldPath.documentId(), bookIds)
                     .get()
                     .addOnSuccessListener { booksResult ->
-
                         val booksMap = booksResult.documents.associateBy { it.id }
 
                         val sortedBooks = bookIds.mapNotNull { id ->
@@ -71,52 +69,81 @@ class HomeViewModel : ViewModel() {
     fun loadRecommendations() {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
-        db.collection("users")
-            .document(userId)
-            .get()
+        db.collection("users").document(userId).get()
             .addOnSuccessListener { doc ->
 
-                val list = doc.get("recentCategories") as? List<String> ?: emptyList()
+                val allData = doc.data ?: emptyMap()
+                val rawScoreMap = allData
+                    .filterKeys { it.startsWith("categoryScore.") }
+                    .mapKeys { it.key.removePrefix("categoryScore.") }
+                    .mapValues { (it.value as? Long) ?: 0L }
+                Log.d("RECOMMEND_SCORE", "rawScoreMap = $rawScoreMap")
 
-                if (list.isEmpty()) {
-                    db.collection("books")
-                        .limit(10)
-                        .get()
-                        .addOnSuccessListener { result ->
-                            val books = result.documents.map { d ->
-                                val book = d.toObject(Book::class.java)
-                                book?.copy(id = d.id) ?: Book(id = d.id)
+                // Normalize + lọc key rác (test, ko co, v.v.)
+                val scoreMap = rawScoreMap
+                    .mapKeys { it.key.trim().lowercase() }
+                    .filter { entry ->
+                        entry.key.isNotBlank() &&
+                                !entry.key.startsWith("test") &&
+                                entry.key != "ko co" &&
+                                entry.key != "ko có"
+                    }
+                Log.d("RECOMMEND_SCORE", "userId = $userId")
+                Log.d("RECOMMEND_SCORE", "doc exists = ${doc.exists()}")
+                Log.d("RECOMMEND_SCORE", "doc data = ${doc.data}")
+                Log.d("RECOMMEND_SCORE", "scoreMap sau normalize = $scoreMap")
+
+
+                // Lấy danh sách sách đã đọc
+                db.collection("users").document(userId)
+                    .collection("recentBooks")
+                    .limit(20)
+                    .get()
+                    .addOnSuccessListener { recentResult ->
+
+                        val readBookIds = recentResult.documents.map { it.id }.toSet()
+
+                        // Lấy toàn bộ sách
+                        db.collection("books").get()
+                            .addOnSuccessListener { allResult ->
+
+                                val allBooks = allResult.documents.mapNotNull { d ->
+                                    d.toObject(Book::class.java)?.copy(id = d.id)
+                                }
+
+                                // Sách chưa đọc
+                                val unreadBooks = allBooks.filter { it.id !in readBookIds }
+
+                                // Object sách đã đọc → dùng cho content-based (author + tags)
+                                val recentBookObjects = allBooks.filter { it.id in readBookIds }
+
+                                if (scoreMap.isEmpty()) {
+                                    // Chưa có history → random sách chưa đọc
+                                    recommendedBooks.value = unreadBooks.shuffled().take(10)
+                                    return@addOnSuccessListener
+                                }
+
+                                // 🔥 Hybrid rank
+                                val ranked = HybridRecommendationEngine.rank(
+                                    books = unreadBooks,
+                                    scoreMap = scoreMap,
+                                    recentBooks = recentBookObjects
+                                )
+
+                                // Nếu không đủ sách chưa đọc → bổ sung sách đã đọc vào cuối
+                                val result = if (ranked.size >= 10) {
+                                    ranked.take(10)
+                                } else {
+                                    val extra = allBooks
+                                        .filter { it.id in readBookIds }
+                                        .shuffled()
+                                        .take(10 - ranked.size)
+                                    ranked + extra
+                                }
+
+                                recommendedBooks.value = result
                             }
-
-                            recommendedBooks.value = books.shuffled()
-                        }
-                    return@addOnSuccessListener
-                }
-
-                // =========================
-                // 🔥 USER CÓ HISTORY
-                // =========================
-                val category = list
-                    .groupingBy { it }
-                    .eachCount()
-                    .maxByOrNull { it.value }
-                    ?.key
-
-                if (category != null) {
-                    db.collection("books")
-                        .whereEqualTo("category", category)
-                        .get()
-                        .addOnSuccessListener { result ->
-
-                            val books = result.documents.map { d ->
-                                val book = d.toObject(Book::class.java)
-                                book?.copy(id = d.id) ?: Book(id = d.id)
-                            }
-
-                            // 🔥 chỉ shuffle nhẹ thôi
-                            recommendedBooks.value = books.shuffled()
-                        }
-                }
+                    }
             }
     }
 }

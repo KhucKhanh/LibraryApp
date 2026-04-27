@@ -87,8 +87,9 @@ class ChapterReaderFragment : Fragment() {
 
             viewModel.saveRecentBook(bookId, chapter.order)
 
+            // +3: Bắt đầu đọc chapter → quan tâm thật sự (chỉ tính 1 lần/phiên)
             if (!hasStartScore) {
-                RecommendationUtils.addCategoryScore(category, 2)
+                RecommendationUtils.addCategoryScore(category, 3)
                 hasStartScore = true
             }
 
@@ -105,10 +106,13 @@ class ChapterReaderFragment : Fragment() {
             stopReading()
             ttsManager.resetPosition()
 
-            // +3 điểm khi hoàn thành sách
             if (viewModel.isLastChapter() && !hasFinishScore) {
-                RecommendationUtils.addCategoryScore(category, 3)
+                // +5: Hoàn thành sách → tín hiệu mạnh nhất
+                RecommendationUtils.addCategoryScore(category, 5)
                 hasFinishScore = true
+            } else {
+                // +2: Hoàn thành 1 chapter thường → đọc liên tục
+                RecommendationUtils.addCategoryScore(category, 2)
             }
 
             viewModel.nextChapter()
