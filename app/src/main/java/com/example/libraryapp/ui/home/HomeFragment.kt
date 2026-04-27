@@ -35,60 +35,73 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val onBookClick: (Book) -> Unit = { selectedBook ->
+        setupAdapters()
+        setupViewModel()
+    }
 
-            AIContextManager.lastSelectedBook = selectedBook
+    // ✅ Tách riêng — dễ đọc, dễ trình bày trong báo cáo
+    private fun navigateToDetail(book: Book) {
+        // Cập nhật context cho AI trước khi navigate
+        AIContextManager.lastSelectedBook = book
+        AIContextManager.currentScreen = "BookDetail"
+        AIContextManager.currentBook = book
 
-            val bundle = Bundle().apply {
-                putString("bookId", selectedBook.id)
-                putString("title", selectedBook.title)
-                putString("author", selectedBook.author)
-                putString("description", selectedBook.description)
-                putString("imageUrl", selectedBook.imageUrl)
-                putString("category", selectedBook.category)
-            }
-
-            findNavController().navigate(
-                R.id.action_homeFragment_to_bookDetailFragment,
-                bundle
-            )
-
+        val bundle = Bundle().apply {
+            putString("bookId", book.id)
+            putString("title", book.title)
+            putString("author", book.author)
+            putString("description", book.description)
+            putString("imageUrl", book.imageUrl)
+            putString("category", book.category)
         }
+
+        findNavController().navigate(
+            R.id.action_homeFragment_to_bookDetailFragment,
+            bundle
+        )
+    }
+
+    private fun setupAdapters() {
+        val onBookClick: (Book) -> Unit = { book -> navigateToDetail(book) }
 
         adapter = BookAdapter(emptyList(), onBookClick)
         recommendedAdapter = BookAdapter(emptyList(), onBookClick)
         recentAdapter = BookAdapter(emptyList(), onBookClick)
 
-        binding.rvBooks.layoutManager =
-            LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-        binding.rvBooks.adapter = adapter
+        binding.rvBooks.apply {
+            layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+            adapter = this@HomeFragment.adapter
+        }
 
-        binding.rvRecommended.layoutManager =
-            LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-        binding.rvRecommended.adapter = recommendedAdapter
+        binding.rvRecommended.apply {
+            layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+            adapter = recommendedAdapter
+        }
 
-        binding.rvRecent.layoutManager =
-            LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-        binding.rvRecent.adapter = recentAdapter
+        binding.rvRecent.apply {
+            layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+            adapter = recentAdapter
+        }
+    }
 
+    private fun setupViewModel() {
         viewModel = ViewModelProvider(this)[HomeViewModel::class.java]
 
         viewModel.loadRecommendations()
         viewModel.loadRecentBooks()
 
-        viewModel.books.observe(viewLifecycleOwner) {
-            adapter.updateData(it)
-
+        viewModel.books.observe(viewLifecycleOwner) { books ->
+            adapter.updateData(books)
+            AIContextManager.allBooks = books
             AIContextManager.currentScreen = "Home"
-            AIContextManager.allBooks = it
         }
 
-        viewModel.recommendedBooks.observe(viewLifecycleOwner) {
-            recommendedAdapter.updateData(it)
+        viewModel.recommendedBooks.observe(viewLifecycleOwner) { books ->
+            recommendedAdapter.updateData(books)
         }
 
-        viewModel.recentBooks.observe(viewLifecycleOwner) {
-            recentAdapter.updateData(it)
+        viewModel.recentBooks.observe(viewLifecycleOwner) { books ->
+            recentAdapter.updateData(books)
         }
     }
 }

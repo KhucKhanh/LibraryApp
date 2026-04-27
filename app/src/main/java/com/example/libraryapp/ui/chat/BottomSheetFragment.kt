@@ -14,6 +14,11 @@ import com.example.libraryapp.model.Message
 import com.example.libraryapp.model.MessageRequest
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.example.libraryapp.ai.AIContextManager
+import com.example.libraryapp.ai.AIPromptBuilder
+import androidx.lifecycle.lifecycleScope
+import com.example.libraryapp.ai.usecase.AskChapterUseCase
+import kotlinx.coroutines.launch
+
 
 class ChatBottomSheet : BottomSheetDialogFragment() {
 
@@ -48,77 +53,66 @@ class ChatBottomSheet : BottomSheetDialogFragment() {
 
         viewModel = ViewModelProvider(this)[ChatViewModel::class.java]
 
-        // Setup chat RecyclerView
         chatAdapter = ChatAdapter(messages)
         binding.rvChat.layoutManager = LinearLayoutManager(context)
         binding.rvChat.adapter = chatAdapter
 
-        // Setup chat list RecyclerView
         chatListAdapter = ChatListAdapter(chatList) { chat ->
-            // Bấm vào chat cũ -> mở chat đó
             openChat(chat.id)
         }
         binding.rvChatList.layoutManager = LinearLayoutManager(context)
         binding.rvChatList.adapter = chatListAdapter
 
-        // Load chat hiện tại
         chatId = getSavedChatId()
         loadHistory()
 
-        // Nút thu nhỏ
         binding.btnMinimize.setOnClickListener { dismiss() }
 
-        // Nút new chat
         binding.btnNewChat.setOnClickListener {
             startNewChat()
         }
 
-        // Nút lịch sử
         binding.btnHistory.setOnClickListener {
             showHistoryPanel()
         }
 
-        // Nút back về chat
         binding.btnBackToChat.setOnClickListener {
             showChatPanel()
         }
 
-        // Nút gửi
         binding.btnSend.setOnClickListener {
             val text = binding.edtMessage.text.toString().trim()
             if (text.isEmpty()) return@setOnClickListener
 
             val isFirstMessage = messages.isEmpty()
-
             messages.add(Message(text, true))
             chatAdapter.notifyItemInserted(messages.size - 1)
             binding.rvChat.scrollToPosition(messages.size - 1)
             binding.edtMessage.text.clear()
 
-            val requestMessages = mutableListOf<MessageRequest>()
-            requestMessages.add(
-                MessageRequest(role = "system", content = AIContextManager.buildPrompt(""))
-            )
-            requestMessages.addAll(
-                messages.map {
-                    MessageRequest(
-                        role = if (it.isUser) "user" else "assistant",
-                        content = it.text
-                    )
-                }
-            )
+            viewLifecycleOwner.lifecycleScope.launch {
+//                val contextPrompt = AIPromptBuilder.build(text)
 
-            viewModel.sendMessage(
-                userId = userId,
-                chatId = chatId,
-                userText = text,
-                messages = requestMessages,
-                isFirstMessage = isFirstMessage
-            ) { reply ->
-                requireActivity().runOnUiThread {
-                    messages.add(Message(reply, false))
-                    chatAdapter.notifyItemInserted(messages.size - 1)
-                    binding.rvChat.scrollToPosition(messages.size - 1)
+                val contextPrompt = AskChapterUseCase.buildPrompt(text)
+
+                val requestMessages = mutableListOf<MessageRequest>()
+                requestMessages.add(MessageRequest(role = "system", content = contextPrompt))
+                requestMessages.add(
+                    MessageRequest(role = "user", content = text)
+                )
+
+                viewModel.sendMessage(
+                    userId = userId,
+                    chatId = chatId,
+                    userText = text,
+                    messages = requestMessages,
+                    isFirstMessage = isFirstMessage
+                ) { reply ->
+                    requireActivity().runOnUiThread {
+                        messages.add(Message(reply, false))
+                        chatAdapter.notifyItemInserted(messages.size - 1)
+                        binding.rvChat.scrollToPosition(messages.size - 1)
+                    }
                 }
             }
         }

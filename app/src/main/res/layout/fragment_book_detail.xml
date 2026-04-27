@@ -104,6 +104,21 @@
                 android:textColor="@android:color/white"
                 android:backgroundTint="#FFB300" />
 
+            <Space
+                android:layout_width="8dp"
+                android:layout_height="wrap_content"/>
+
+            <Button
+                android:id="@+id/btnAddToLibrary"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:text="+ Lưu"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:backgroundTint="#4CAF50" />
+
+
         </LinearLayout>
 
     </LinearLayout>

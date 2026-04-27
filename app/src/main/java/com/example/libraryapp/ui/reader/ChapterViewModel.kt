@@ -122,4 +122,21 @@ class ChapterViewModel(application: Application) : AndroidViewModel(application)
         val list = chapters.value ?: return false
         return currentIndex < list.size - 1
     }
+
+    // Thêm vào ChapterViewModel.kt
+    fun saveRecentBook(bookId: String, chapterOrder: Int) {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val data = hashMapOf(
+            "bookId" to bookId,
+            "lastChapterId" to chapterOrder,
+            "timestamp" to System.currentTimeMillis()
+        )
+        FirebaseFirestore.getInstance()
+            .collection("users")
+            .document(uid)
+            .collection("recentBooks")
+            .document(bookId)
+            .set(data)
+    }
+
 }

@@ -139,4 +139,14 @@ class LibraryRepository {
             .addOnFailureListener { callback(false) }
     }
 
+    fun addBookToLibrary(libraryId: String, bookId: String) {
+        val ref = libRef().document(libraryId)
+        ref.get().addOnSuccessListener { doc ->
+            val list = doc.get("books") as? List<String> ?: emptyList()
+            if (!list.contains(bookId)) {
+                ref.update("books", list + bookId)
+            }
+        }
+    }
+
 }
