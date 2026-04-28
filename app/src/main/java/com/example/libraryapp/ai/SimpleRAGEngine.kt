@@ -1,11 +1,14 @@
 package com.example.libraryapp.ai
 
+import android.util.Log
 import com.example.libraryapp.data.remote.EmbeddingClient
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.math.sqrt
 
 object SimpleRAGEngine {
 
-    private var storedChunks: List<Pair<String, List<Float>>> = emptyList()
     private var lastKey: String = ""
 
     suspend fun indexChapter(bookId: String, chapterTitle: String, content: String) {
@@ -14,44 +17,83 @@ object SimpleRAGEngine {
         lastKey = key
 
         val chunks = chunkContent(content)
-        FirestoreRAGRepository.saveChunks(bookId, chapterTitle, chunks)
+        withContext(Dispatchers.IO) {
+            FirestoreRAGRepository.saveChunks(bookId, chapterTitle, chunks)
+        }
     }
 
     suspend fun retrieve(
-        bookId: String,
-        chapter: String,
         query: String,
-        topK: Int = 2
-    ): String {
+        currentBookId: String = "",
+        topK: Int = 3
+    ): List<RetrievedChunk> {
 
-        val chunks = FirestoreRAGRepository.getChunks(bookId, chapter)
+        Log.d("RAG_DEBUG", "🔍 retrieve() called, query=$query")
 
-        android.util.Log.d("RAG_DEBUG", "Chunks fetched: ${chunks.size}")
+        val chunks = withContext(Dispatchers.IO) {
+            FirestoreRAGRepository.getAllChunks()
+        }
 
-        if (chunks.isEmpty()) return ""
+        Log.d("RAG_DEBUG", "📦 Total chunks fetched: ${chunks.size}")
 
-        val queryVector = EmbeddingClient.embed(query)
-            ?: return fallbackRetrieveFromChunks(query, chunks, topK)
+        if (chunks.isEmpty()) {
+            Log.e("RAG_DEBUG", "❌ No chunks found!")
+            return emptyList()
+        }
 
-        return chunks
-            .map { chunk ->
-                val score = cosineSimilarity(queryVector, chunk.embedding)
-                Pair(chunk.text, score)
+        val queryVector = try {
+            Log.d("RAG_DEBUG", "⏳ Bắt đầu gọi EmbeddingClient.embed()")
+            val v = withContext(Dispatchers.IO) {
+                withTimeoutOrNull(5000L) {
+                    Log.d("RAG_DEBUG", "⏳ Trong withTimeoutOrNull, gọi embed...")
+                    EmbeddingClient.embed(query)
+                }
             }
-            .sortedByDescending { it.second }
-            .distinctBy { it.first }
+            Log.d("RAG_DEBUG", "⏳ Sau embed, v null? ${v == null}")
+            if (v == null) {
+                Log.e("RAG_DEBUG", "❌ QueryVector NULL — timeout hoặc embed() trả null")
+            } else {
+                Log.d("RAG_DEBUG", "🧮 QueryVector OK, size=${v.size}")
+            }
+            v
+        } catch (e: Exception) {
+            Log.e("RAG_DEBUG", "❌ Embed query EXCEPTION: ${e.message}", e)
+            null
+        }
+
+        if (queryVector == null) return fallbackRetrieve(query, chunks, topK)
+
+        val scored = chunks.map { chunk ->
+            var score = cosineSimilarity(queryVector, chunk.embedding)
+            if (chunk.bookId == currentBookId) score += 0.2f
+            Log.d("RAG_DEBUG", "📊 score=$score | book=${chunk.bookId} | chapter=${chunk.chapter}")
+            RetrievedChunk(
+                text = chunk.text,
+                bookId = chunk.bookId,
+                chapter = chunk.chapter,
+                score = score
+            )
+        }
+
+        val result = scored
+            .sortedByDescending { it.score }
+            .distinctBy { it.text }
             .take(topK)
-            .joinToString("\n\n---\n\n") { it.first }
+
+        Log.d("RAG_DEBUG", "✅ Final top ${result.size} chunks")
+        result.forEach {
+            Log.d("RAG_DEBUG", "🏆 book=${it.bookId} | chapter=${it.chapter} | score=${it.score}")
+        }
+
+        return result
     }
 
     fun clear() {
-        storedChunks = emptyList()
         lastKey = ""
     }
 
     private fun chunkContent(content: String): List<String> {
         val sentences = content.split(Regex("(?<=[.!?])\\s+"))
-
         val chunks = mutableListOf<String>()
         var current = ""
 
@@ -64,10 +106,7 @@ object SimpleRAGEngine {
             }
         }
 
-        if (current.isNotEmpty()) {
-            chunks.add(current.trim())
-        }
-
+        if (current.isNotEmpty()) chunks.add(current.trim())
         return chunks
     }
 
@@ -94,21 +133,29 @@ object SimpleRAGEngine {
         return if (union == 0f) 0f else intersection / union
     }
 
-    private fun fallbackRetrieveFromChunks(
+    private fun fallbackRetrieve(
         query: String,
         chunks: List<ChunkData>,
         topK: Int
-    ): String {
+    ): List<RetrievedChunk> {
+        Log.w("RAG_DEBUG", "⚠️ Using Jaccard fallback")
         val queryWords = tokenize(query)
-
-        return chunks
+        val results = chunks
             .map { chunk ->
                 val score = jaccardSimilarity(queryWords, tokenize(chunk.text))
-                Pair(chunk.text, score)
+                Log.d("RAG_DEBUG", "📊 Jaccard score=$score | book=${chunk.bookId} | chapter=${chunk.chapter}")
+                RetrievedChunk(
+                    text = chunk.text,
+                    bookId = chunk.bookId,
+                    chapter = chunk.chapter,
+                    score = score
+                )
             }
-            .sortedByDescending { it.second }
+            .sortedByDescending { it.score }
+            .distinctBy { it.text }
             .take(topK)
-            .joinToString("\n\n---\n\n") { it.first }
-    }
 
+        Log.d("RAG_DEBUG", "✅ Fallback result: ${results.size} chunks")
+        return results
+    }
 }

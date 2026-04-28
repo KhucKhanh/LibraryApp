@@ -38,6 +38,7 @@ class FirebaseChatRepository {
     ) {
         messagesRef(userId, chatId)
             .orderBy("timestamp")
+            .limitToLast(30)
             .get()
             .addOnSuccessListener { result ->
                 val history = result.documents.mapNotNull { doc ->

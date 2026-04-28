@@ -2,6 +2,7 @@ package com.example.libraryapp.ai.prompt
 
 import android.util.Log
 import com.example.libraryapp.ai.AIContextManager
+import com.example.libraryapp.ai.RetrievedChunk
 import com.example.libraryapp.ai.SimpleRAGEngine
 
 object ChapterReaderPrompt {
@@ -13,7 +14,6 @@ object ChapterReaderPrompt {
 
         val book = context.book
         val chapterName = context.chapter ?: "Không rõ"
-        val content = context.chapterContent
         val bookId = book?.id ?: ""
 
         Log.d("RAG_DEBUG", "========== ChapterReaderPrompt ==========")
@@ -21,67 +21,61 @@ object ChapterReaderPrompt {
         Log.d("RAG_DEBUG", "Chapter: $chapterName")
         Log.d("RAG_DEBUG", "User question: $userMessage")
 
-        // 🔥 Check content
-        if (content.isNullOrBlank()) {
-            Log.e("RAG_DEBUG", "❌ Content is NULL or EMPTY → RAG WILL NOT RUN")
+        // 🔥 Index chương hiện tại nếu chưa có
+        if (!context.chapterContent.isNullOrBlank()) {
+            Log.d("RAG_DEBUG", "➡️ Calling indexChapter...")
+            SimpleRAGEngine.indexChapter(bookId, chapterName, context.chapterContent)
+            Log.d("RAG_DEBUG", "✅ indexChapter done")
         } else {
-            Log.d("RAG_DEBUG", "✅ Content length: ${content.length}")
-            Log.d("RAG_DEBUG", "Content preview: ${content.take(100)}")
+            Log.w("RAG_DEBUG", "⚠️ chapterContent null/blank, skip index")
         }
 
-        // 🔥 RAG retrieval
-        val retrievedContext = if (!content.isNullOrBlank()) {
-
-            Log.d("RAG_DEBUG", "➡️ Calling indexChapter...")
-            SimpleRAGEngine.indexChapter(bookId, chapterName, content)
-
-            Log.d("RAG_DEBUG", "➡️ Calling retrieve...")
+        // 🔥 RAG retrieval — tìm xuyên toàn bộ thư viện
+        val retrievedChunks: List<RetrievedChunk> = try {
             val result = SimpleRAGEngine.retrieve(
-                bookId,
-                chapterName,
-                userMessage,
+                query = userMessage,
                 topK = 3
             )
-
-            if (result.isBlank()) {
-                Log.e("RAG_DEBUG", "❌ Retrieved context is EMPTY")
-            } else {
-                Log.d("RAG_DEBUG", "✅ Retrieved context SUCCESS")
-                Log.d("RAG_DEBUG", "Retrieved preview: ${result.take(200)}")
-            }
-
+            Log.d("RAG_DEBUG", "✅ Retrieved ${result.size} chunks")
             result
-        } else {
-            ""
+        } catch (e: Exception) {
+            Log.e("RAG_DEBUG", "❌ Retrieve FAILED: ${e.message}")
+            emptyList()
         }
 
-        val finalContext = if (retrievedContext.isNotBlank()) {
-            retrievedContext
+        // 🔥 Build context string
+        val finalContext: String
+        val sourceLabel: String
+
+        if (retrievedChunks.isNotEmpty()) {
+            finalContext = retrievedChunks.joinToString("\n\n---\n\n") { chunk ->
+                "[${chunk.bookId} — ${chunk.chapter}]\n${chunk.text}"
+            }
+            sourceLabel = "[Ngữ cảnh được truy xuất bằng RAG — ${retrievedChunks.size} đoạn]"
         } else {
-            Log.w("RAG_DEBUG", "⚠️ Using FALLBACK content")
-            content?.take(1200) ?: "Không có nội dung chương."
+            Log.w("RAG_DEBUG", "⚠️ RAG empty, dùng fallback content")
+            finalContext = context.chapterContent?.take(1200)
+                ?: "Không có nội dung chương."
+            sourceLabel = "[Fallback: nội dung đầu chương hiện tại]"
         }
 
-        val sourceLabel = if (retrievedContext.isNotBlank()) {
-            "[Ngữ cảnh được truy xuất bằng RAG]"
-        } else {
-            "[Fallback: nội dung đầu chương]"
-        }
-
+        Log.d("RAG_DEBUG", "Source: $sourceLabel")
+        Log.d("RAG_DEBUG", "Context preview: ${finalContext.take(200)}")
         Log.d("RAG_DEBUG", "========== END PROMPT BUILD ==========")
 
         return """
 Bạn là trợ lý AI trong ứng dụng đọc sách LibraryApp.
 
-Sách: ${book?.title ?: "Không rõ"} — Tác giả: ${book?.author ?: "Không rõ"}
-Chương: $chapterName
+Sách đang đọc: ${book?.title ?: "Không rõ"} — Tác giả: ${book?.author ?: "Không rõ"}
+Chương đang đọc: $chapterName
 
 $sourceLabel
 $finalContext
 
 Yêu cầu:
 - Trả lời dựa vào nội dung trên
-- Nếu không có thông tin: nói "Nội dung chương không đề cập điều này"
+- Nếu context đến từ nhiều sách khác nhau, hãy chỉ rõ nguồn khi trả lời
+- Nếu không có thông tin: nói "Nội dung không đề cập điều này"
 - Trả lời ngắn gọn, dễ hiểu
 
 Câu hỏi: $userMessage

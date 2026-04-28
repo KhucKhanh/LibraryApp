@@ -100,6 +100,16 @@ class ChatBottomSheet : BottomSheetDialogFragment() {
 
                 val requestMessages = mutableListOf<MessageRequest>()
                 requestMessages.add(MessageRequest(role = "system", content = systemPrompt))
+
+                messages.dropLast(1).takeLast(10).forEach { msg ->
+                    requestMessages.add(
+                        MessageRequest(
+                            role = if (msg.isUser) "user" else "assistant",
+                            content = msg.text
+                        )
+                    )
+                }
+
                 requestMessages.add(MessageRequest(role = "user", content = text))
 
                 viewModel.sendMessage(
@@ -110,6 +120,7 @@ class ChatBottomSheet : BottomSheetDialogFragment() {
                     isFirstMessage = isFirstMessage
                 ) { reply ->
                     requireActivity().runOnUiThread {
+                        if (!isAdded || _binding == null) return@runOnUiThread
                         messages.add(Message(reply, false))
                         chatAdapter.notifyItemInserted(messages.size - 1)
                         binding.rvChat.scrollToPosition(messages.size - 1)
@@ -120,7 +131,6 @@ class ChatBottomSheet : BottomSheetDialogFragment() {
     }
 
     private fun openChat(id: String) {
-        // Lưu chatId mới, load lịch sử, về panel chat
         requireContext()
             .getSharedPreferences("chat_prefs", 0)
             .edit().putString("chat_id", id).apply()
@@ -147,8 +157,8 @@ class ChatBottomSheet : BottomSheetDialogFragment() {
         binding.panelChat.visibility = View.GONE
         binding.panelHistory.visibility = View.VISIBLE
 
-        // Load danh sách chat
         viewModel.loadChatList(userId) { chats ->
+            if (!isAdded || _binding == null) return@loadChatList
             chatList.clear()
             chatList.addAll(chats)
             chatListAdapter.notifyDataSetChanged()
@@ -171,6 +181,7 @@ class ChatBottomSheet : BottomSheetDialogFragment() {
 
     private fun loadHistory() {
         viewModel.loadChatHistory(userId, chatId) { history ->
+            if (!isAdded || _binding == null) return@loadChatHistory
             messages.addAll(history)
             chatAdapter.notifyDataSetChanged()
             if (messages.isNotEmpty())

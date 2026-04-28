@@ -6,7 +6,8 @@ object HomePrompt {
 
     fun build(): String {
         val books = AIContextManager.allBooks
-            .take(10)
+            .shuffled()
+            .take(20)
             .joinToString("\n") { "- ${it.title} | ${it.author} | ${it.category}" }
             .ifEmpty { "Chưa có sách nào trong hệ thống." }
 
@@ -18,6 +19,8 @@ Bạn có thể:
 - Gợi ý sách phù hợp từ danh sách bên dưới (KHÔNG bịa thêm sách ngoài danh sách)
 - Trả lời câu hỏi chung về sách, tác giả, thể loại
 - Hỗ trợ người dùng tìm sách theo nhu cầu
+
+Khi người dùng hỏi chung chung như "đọc gì hôm nay", hãy CHỦ ĐỘNG gợi ý 1-2 cuốn sách cụ thể từ danh sách, không hỏi ngược lại.
 
 Danh sách sách hiện có:
 $books

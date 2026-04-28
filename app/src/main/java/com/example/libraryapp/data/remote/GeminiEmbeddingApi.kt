@@ -9,7 +9,7 @@ interface GeminiEmbeddingApi {
 
     @POST("models/{model}:embedContent")
     suspend fun embed(
-        @Path("model") model: String = "gemini-embedding-001",
+        @Path("model") model: String,  // ✅ bỏ default
         @Query("key") apiKey: String,
         @Body request: GeminiEmbeddingRequest
     ): GeminiEmbeddingResponse

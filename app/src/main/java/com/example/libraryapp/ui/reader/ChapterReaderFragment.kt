@@ -75,7 +75,7 @@ class ChapterReaderFragment : Fragment() {
         viewModel.loadChapters(bookId, chapterOrder)
 
         viewModel.currentChapter.observe(viewLifecycleOwner) { chapter ->
-            if (chapter == null) return@observe
+            if (chapter == null || _binding == null) return@observe
 
             SimpleRAGEngine.clear()
 
@@ -94,8 +94,11 @@ class ChapterReaderFragment : Fragment() {
             }
 
             viewModel.getScrollForChapter(bookId, chapter.order) { scrollY ->
-                binding.scrollView.post {
-                    binding.scrollView.scrollTo(0, scrollY)
+                val b = _binding ?: return@getScrollForChapter
+
+                b.scrollView.post {
+                    val safeBinding = _binding ?: return@post
+                    safeBinding.scrollView.scrollTo(0, scrollY)
                 }
             }
         }

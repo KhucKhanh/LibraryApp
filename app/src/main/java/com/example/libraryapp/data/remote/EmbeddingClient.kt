@@ -10,6 +10,7 @@ object EmbeddingClient {
     suspend fun embed(text: String): List<Float>? {
         return try {
             val response = GeminiEmbeddingClient.api.embed(
+                model = "gemini-embedding-001",   // ✅ thêm dòng này
                 apiKey = API_KEY,
                 request = GeminiEmbeddingRequest(
                     content = GeminiContent(
