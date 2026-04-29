@@ -92,7 +92,10 @@ class HomeFragment : Fragment() {
         viewModel.loadRecentBooks()
 
         viewModel.books.observe(viewLifecycleOwner) { books ->
+            binding.progressBar.visibility = View.GONE
+            binding.rvBooks.visibility = View.VISIBLE
             adapter.updateData(books)
+            AIContextManager.allBooks = books
             AIContextManager.currentScreen = "Home"
         }
 

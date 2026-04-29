@@ -7,7 +7,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 class LibraryRepository {
 
-    private val db = FirebaseFirestore.getInstance()
+    private val db by lazy { FirebaseFirestore.getInstance() }
+
     private val auth = FirebaseAuth.getInstance()
 
     private fun libRef() =

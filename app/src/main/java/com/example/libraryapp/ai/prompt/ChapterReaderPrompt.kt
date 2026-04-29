@@ -21,7 +21,6 @@ object ChapterReaderPrompt {
         Log.d("RAG_DEBUG", "Chapter: $chapterName")
         Log.d("RAG_DEBUG", "User question: $userMessage")
 
-        // 🔥 Index chương hiện tại nếu chưa có
         if (!context.chapterContent.isNullOrBlank()) {
             Log.d("RAG_DEBUG", "➡️ Calling indexChapter...")
             SimpleRAGEngine.indexChapter(bookId, chapterName, context.chapterContent)
@@ -30,20 +29,40 @@ object ChapterReaderPrompt {
             Log.w("RAG_DEBUG", "⚠️ chapterContent null/blank, skip index")
         }
 
-        // 🔥 RAG retrieval — tìm xuyên toàn bộ thư viện
+        val isCrossBook = listOf(
+            "so sánh", "so sanh",
+            "compare",
+            "khác nhau", "khac nhau",
+            "giống nhau", "giong nhau",
+            "với cuốn", "voi cuon",
+            "và cuốn", "va cuon"
+        ).any { userMessage.lowercase().contains(it) }
+
         val retrievedChunks: List<RetrievedChunk> = try {
             val result = SimpleRAGEngine.retrieve(
                 query = userMessage,
-                topK = 3
+                currentBookId = bookId,
+                topK = if (isCrossBook) 6 else 3,
+                filterToCurrentBook = !isCrossBook
             )
-            Log.d("RAG_DEBUG", "✅ Retrieved ${result.size} chunks")
-            result
+
+            val final = if (isCrossBook) {
+                result.groupBy { it.bookId }
+                    .values
+                    .flatMap { it.take(2) }
+                    .sortedByDescending { it.score }
+                    .take(4)
+            } else {
+                result
+            }
+
+            Log.d("RAG_DEBUG", "✅ Retrieved ${final.size} chunks (crossBook=$isCrossBook)")
+            final
         } catch (e: Exception) {
             Log.e("RAG_DEBUG", "❌ Retrieve FAILED: ${e.message}")
             emptyList()
         }
 
-        // 🔥 Build context string
         val finalContext: String
         val sourceLabel: String
 
@@ -73,10 +92,10 @@ $sourceLabel
 $finalContext
 
 Yêu cầu:
-- Trả lời dựa vào nội dung trên
-- Nếu context đến từ nhiều sách khác nhau, hãy chỉ rõ nguồn khi trả lời
+- Trả lời NGẮN GỌN, tối đa 150 từ
+- KHÔNG liệt kê lại toàn bộ nội dung, chỉ nêu ý chính
+- Nếu context đến từ nhiều sách khác nhau, chỉ rõ nguồn
 - Nếu không có thông tin: nói "Nội dung không đề cập điều này"
-- Trả lời ngắn gọn, dễ hiểu
 
 Câu hỏi: $userMessage
         """.trimIndent()

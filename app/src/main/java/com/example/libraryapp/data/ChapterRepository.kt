@@ -6,7 +6,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 class ChapterRepository {
 
-    private val db = FirebaseFirestore.getInstance()
+    private val db by lazy { FirebaseFirestore.getInstance() }
 
     fun getChaptersByBook(bookId: String, onResult: (List<Chapter>) -> Unit) {
         db.collection("books")
@@ -24,7 +24,7 @@ class ChapterRepository {
                 onResult(chapters)
             }
             .addOnFailureListener {
-                Log.e("REPO", "Error: ${it.message}", it) // ✅ xem message cụ thể
+                Log.e("REPO", "Error: ${it.message}", it)
                 onResult(emptyList())
             }
     }

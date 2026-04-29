@@ -6,8 +6,7 @@ import com.google.firebase.firestore.SetOptions
 
 object RecommendationUtils {
 
-    private val db = FirebaseFirestore.getInstance()
-
+    private val db by lazy { FirebaseFirestore.getInstance() }
     /**
      * Implicit feedback scoring:
      *

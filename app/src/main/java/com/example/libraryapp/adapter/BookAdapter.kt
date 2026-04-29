@@ -4,6 +4,8 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.example.libraryapp.R
 import com.example.libraryapp.databinding.ItemBookBinding
 import com.example.libraryapp.data.LibraryRepository
 import com.example.libraryapp.model.Book
@@ -14,7 +16,7 @@ class BookAdapter(
 ) : RecyclerView.Adapter<BookAdapter.BookViewHolder>() {
 
     private val repo = LibraryRepository()
-
+    private val likedCache = mutableMapOf<String, Boolean>()
 
     class BookViewHolder(val binding: ItemBookBinding) :
         RecyclerView.ViewHolder(binding.root)
@@ -36,23 +38,23 @@ class BookAdapter(
 
         Glide.with(holder.itemView.context)
             .load(book.imageUrl ?: "")
+            .placeholder(R.drawable.ic_book_placeholder)
+            .error(R.drawable.ic_book_placeholder)
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
             .into(holder.binding.imgBook)
 
-        repo.isBookInLibrary("liked", book.id) { liked ->
-
-            holder.binding.btnFavorite.setImageResource(
-                if (liked) com.example.libraryapp.R.drawable.ic_favorite
-                else com.example.libraryapp.R.drawable.ic_favorite_border
-            )
-        }
+        val liked = likedCache[book.id] ?: false
+        holder.binding.btnFavorite.setImageResource(
+            if (liked) R.drawable.ic_favorite
+            else R.drawable.ic_favorite_border
+        )
 
         holder.binding.btnFavorite.setOnClickListener {
-
-            repo.toggleLiked(book.id) { liked ->
-
+            repo.toggleLiked(book.id) { isLiked ->
+                likedCache[book.id] = isLiked
                 holder.binding.btnFavorite.setImageResource(
-                    if (liked) com.example.libraryapp.R.drawable.ic_favorite
-                    else com.example.libraryapp.R.drawable.ic_favorite_border
+                    if (isLiked) R.drawable.ic_favorite
+                    else R.drawable.ic_favorite_border
                 )
             }
         }
@@ -67,5 +69,18 @@ class BookAdapter(
     fun updateData(newBooks: List<Book>) {
         books = newBooks
         notifyDataSetChanged()
+        preloadLikedState()
+    }
+
+    private fun preloadLikedState() {
+        books.forEach { book ->
+            if (!likedCache.containsKey(book.id)) {
+                repo.isBookInLibrary("liked", book.id) { liked ->
+                    likedCache[book.id] = liked
+                    val index = books.indexOfFirst { it.id == book.id }
+                    if (index != -1) notifyItemChanged(index)
+                }
+            }
+        }
     }
 }

@@ -5,6 +5,7 @@ import com.example.libraryapp.data.remote.EmbeddingClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
+import kotlin.coroutines.coroutineContext
 import kotlin.math.sqrt
 
 object SimpleRAGEngine {
@@ -25,27 +26,43 @@ object SimpleRAGEngine {
     suspend fun retrieve(
         query: String,
         currentBookId: String = "",
-        topK: Int = 3
+        topK: Int = 3,
+        filterToCurrentBook: Boolean = false
     ): List<RetrievedChunk> {
 
         Log.d("RAG_DEBUG", "🔍 retrieve() called, query=$query")
 
-        val chunks = withContext(Dispatchers.IO) {
+        val allChunks = withContext(Dispatchers.IO) {
             FirestoreRAGRepository.getAllChunks()
         }
 
-        Log.d("RAG_DEBUG", "📦 Total chunks fetched: ${chunks.size}")
+        Log.d("RAG_DEBUG", "📦 Total chunks fetched: ${allChunks.size}")
 
-        if (chunks.isEmpty()) {
+        if (allChunks.isEmpty()) {
             Log.e("RAG_DEBUG", "❌ No chunks found!")
             return emptyList()
         }
 
+        val chunks = if (filterToCurrentBook && currentBookId.isNotBlank()) {
+            Log.d("RAG_DEBUG", "🔖 Filtering to currentBookId=$currentBookId")
+            allChunks.filter { it.bookId == currentBookId }
+        } else {
+            allChunks
+        }
+
+        Log.d("RAG_DEBUG", "📦 Candidate chunks after filter: ${chunks.size}")
+
+        if (chunks.isEmpty()) {
+            Log.w("RAG_DEBUG", "⚠️ No chunks after filter, fallback to all")
+            return fallbackRetrieve(query, allChunks, topK)
+        }
+
         val queryVector = try {
             Log.d("RAG_DEBUG", "⏳ Bắt đầu gọi EmbeddingClient.embed()")
-            val v = withContext(Dispatchers.IO) {
-                withTimeoutOrNull(5000L) {
-                    Log.d("RAG_DEBUG", "⏳ Trong withTimeoutOrNull, gọi embed...")
+            Log.d("RAG_DEBUG", "⏳ isActive: ${coroutineContext[kotlinx.coroutines.Job]?.isActive}")
+
+            val v = withTimeoutOrNull(5000L) {
+                withContext(Dispatchers.IO) {
                     EmbeddingClient.embed(query)
                 }
             }
@@ -64,8 +81,7 @@ object SimpleRAGEngine {
         if (queryVector == null) return fallbackRetrieve(query, chunks, topK)
 
         val scored = chunks.map { chunk ->
-            var score = cosineSimilarity(queryVector, chunk.embedding)
-            if (chunk.bookId == currentBookId) score += 0.2f
+            val score = cosineSimilarity(queryVector, chunk.embedding)
             Log.d("RAG_DEBUG", "📊 score=$score | book=${chunk.bookId} | chapter=${chunk.chapter}")
             RetrievedChunk(
                 text = chunk.text,

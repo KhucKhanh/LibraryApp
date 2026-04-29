@@ -11,7 +11,7 @@ import com.google.firebase.firestore.SetOptions
 
 class ChapterViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val db = FirebaseFirestore.getInstance()
+    private val db by lazy { FirebaseFirestore.getInstance() }
     private val auth = FirebaseAuth.getInstance()
 
     val chapters = MutableLiveData<List<Chapter>>()

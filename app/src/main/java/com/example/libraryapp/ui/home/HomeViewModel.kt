@@ -24,15 +24,32 @@ class HomeViewModel : ViewModel() {
     }
 
     private fun loadBooks() {
+        // Cache trước → hiện ngay
         db.collection("books")
-            .get()
+            .get(com.google.firebase.firestore.Source.CACHE)
             .addOnSuccessListener { result ->
-                val list = result.documents.map { doc ->
-                    val book = doc.toObject(Book::class.java)
-                    book?.copy(id = doc.id) ?: Book(id = doc.id)
+                if (!result.isEmpty) {
+                    val list = result.documents.mapNotNull { doc ->
+                        doc.toObject(Book::class.java)?.copy(id = doc.id)
+                    }
+                    books.value = list
+                    AIContextManager.allBooks = list
                 }
-                books.value = list
-                AIContextManager.allBooks = list
+            }
+            .addOnCompleteListener {
+                // Server update ngầm
+                db.collection("books")
+                    .get(com.google.firebase.firestore.Source.SERVER)
+                    .addOnSuccessListener { result ->
+                        val list = result.documents.mapNotNull { doc ->
+                            doc.toObject(Book::class.java)?.copy(id = doc.id)
+                        }
+                        books.value = list
+                        AIContextManager.allBooks = list
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("HOME_DEBUG", "Server fetch failed: ${e.message}")
+                    }
             }
     }
 
@@ -131,6 +148,11 @@ class HomeViewModel : ViewModel() {
                                     scoreMap = scoreMap,
                                     recentBooks = recentBookObjects
                                 )
+
+                                Log.d("RECOMMEND_DEBUG", "scoreMap = $scoreMap")
+                                Log.d("RECOMMEND_DEBUG", "readBookIds = $readBookIds")
+                                Log.d("RECOMMEND_DEBUG", "unreadBooks = ${unreadBooks.size}")
+                                Log.d("RECOMMEND_DEBUG", "ranked = ${ranked.map { it.title }}")
 
                                 // Nếu không đủ sách chưa đọc → bổ sung sách đã đọc vào cuối
                                 val result = if (ranked.size >= 10) {

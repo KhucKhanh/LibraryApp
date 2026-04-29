@@ -14,9 +14,6 @@ import com.example.libraryapp.model.Message
 import com.example.libraryapp.model.MessageRequest
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.example.libraryapp.ai.AIContextManager
-import androidx.lifecycle.lifecycleScope
-import com.example.libraryapp.ai.ScreenPromptBuilder
-import kotlinx.coroutines.launch
 
 
 class ChatBottomSheet : BottomSheetDialogFragment() {
@@ -50,7 +47,7 @@ class ChatBottomSheet : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel = ViewModelProvider(this)[ChatViewModel::class.java]
+        viewModel = ViewModelProvider(requireActivity())[ChatViewModel::class.java]
 
         chatAdapter = ChatAdapter(messages)
         binding.rvChat.layoutManager = LinearLayoutManager(context)
@@ -84,47 +81,27 @@ class ChatBottomSheet : BottomSheetDialogFragment() {
             if (text.isEmpty()) return@setOnClickListener
 
             val isFirstMessage = messages.isEmpty()
+            val contextSnapshot = AIContextManager.snapshot()
+            val history = messages.toList()
 
             messages.add(Message(text, true))
             chatAdapter.notifyItemInserted(messages.size - 1)
             binding.rvChat.scrollToPosition(messages.size - 1)
             binding.edtMessage.text.clear()
 
-            // 🔥 LẤY CONTEXT MỚI MỖI LẦN (QUAN TRỌNG)
-            val contextSnapshot = AIContextManager.snapshot()
-
-            viewLifecycleOwner.lifecycleScope.launch {
-
-                // 🔥 BUILD PROMPT CÓ RAG
-                val systemPrompt = ScreenPromptBuilder.build(contextSnapshot, text)
-
-                val requestMessages = mutableListOf<MessageRequest>()
-                requestMessages.add(MessageRequest(role = "system", content = systemPrompt))
-
-                messages.dropLast(1).takeLast(10).forEach { msg ->
-                    requestMessages.add(
-                        MessageRequest(
-                            role = if (msg.isUser) "user" else "assistant",
-                            content = msg.text
-                        )
-                    )
-                }
-
-                requestMessages.add(MessageRequest(role = "user", content = text))
-
-                viewModel.sendMessage(
-                    userId = userId,
-                    chatId = chatId,
-                    userText = text,
-                    messages = requestMessages,
-                    isFirstMessage = isFirstMessage
-                ) { reply ->
-                    requireActivity().runOnUiThread {
-                        if (!isAdded || _binding == null) return@runOnUiThread
-                        messages.add(Message(reply, false))
-                        chatAdapter.notifyItemInserted(messages.size - 1)
-                        binding.rvChat.scrollToPosition(messages.size - 1)
-                    }
+            viewModel.buildAndSend(
+                contextSnapshot = contextSnapshot,
+                text = text,
+                userId = userId,
+                chatId = chatId,
+                isFirstMessage = isFirstMessage,
+                history = history
+            ) { reply ->
+                requireActivity().runOnUiThread {
+                    if (!isAdded || _binding == null) return@runOnUiThread
+                    messages.add(Message(reply, false))
+                    chatAdapter.notifyItemInserted(messages.size - 1)
+                    binding.rvChat.scrollToPosition(messages.size - 1)
                 }
             }
         }

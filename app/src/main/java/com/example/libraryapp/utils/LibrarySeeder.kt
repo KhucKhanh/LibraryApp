@@ -5,7 +5,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 class LibrarySeeder {
 
-    private val db = FirebaseFirestore.getInstance()
+    private val db by lazy { FirebaseFirestore.getInstance() }
     private val auth = FirebaseAuth.getInstance()
 
     fun createLikedLibrary() {
