@@ -3,18 +3,22 @@
 
     <item
         android:id="@+id/homeFragment"
-        android:icon="@drawable/ic_launcher_foreground"
-        android:title="Home"/>
+        android:icon="@drawable/ic_home"
+        android:title="Trang chủ"/>
+
     <item
         android:id="@+id/searchFragment"
-        android:icon="@drawable/ic_launcher_foreground"
-        android:title="Search"/>
+        android:icon="@drawable/ic_search"
+        android:title="Tìm kiếm"/>
+
     <item
         android:id="@+id/libraryFragment"
-        android:icon="@drawable/ic_launcher_foreground"
-        android:title="Library"/>
+        android:icon="@drawable/ic_library"
+        android:title="Thư viện"/>
+
     <item
         android:id="@+id/profileFragment"
-        android:icon="@drawable/ic_launcher_foreground"
-        android:title="Profile"/>
+        android:icon="@drawable/ic_profile"
+        android:title="Cá nhân"/>
+
 </menu>
