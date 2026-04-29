@@ -11,11 +11,15 @@ import com.example.libraryapp.databinding.FragmentLoginBinding
 
 class LoginFragment : Fragment(R.layout.fragment_login) {
 
-    private lateinit var binding: FragmentLoginBinding
+    private var _binding: FragmentLoginBinding? = null
+    private val binding get() = _binding!!
+
     private lateinit var viewModel: AuthViewModel
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        binding = FragmentLoginBinding.bind(view)
+        super.onViewCreated(view, savedInstanceState)
+
+        _binding = FragmentLoginBinding.bind(view)
         viewModel = ViewModelProvider(this)[AuthViewModel::class.java]
 
         binding.btnLogin.setOnClickListener {
@@ -33,6 +37,9 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                 return@setOnClickListener
             }
             viewModel.login(email, password) { success, error ->
+
+                if (!isAdded || view == null) return@login
+
                 if (success) {
                     val navOptions = androidx.navigation.NavOptions.Builder()
                         .setPopUpTo(R.id.loginFragment, true)
@@ -58,5 +65,10 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
             findNavController().navigate(R.id.action_loginFragment_to_forgotPasswordFragment)
         }
 
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null // ✅ Tránh memory leak
     }
 }

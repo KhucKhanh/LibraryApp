@@ -5,21 +5,22 @@ import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import com.example.libraryapp.R
 import com.example.libraryapp.databinding.FragmentRegisterBinding
-import androidx.navigation.fragment.findNavController
 
 class RegisterFragment : Fragment(R.layout.fragment_register) {
 
-    private lateinit var binding: FragmentRegisterBinding
+    private var _binding: FragmentRegisterBinding? = null
+    private val binding get() = _binding!!
     private lateinit var viewModel: AuthViewModel
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        binding = FragmentRegisterBinding.bind(view)
+        super.onViewCreated(view, savedInstanceState)
+        _binding = FragmentRegisterBinding.bind(view)
         viewModel = ViewModelProvider(this)[AuthViewModel::class.java]
 
         binding.btnRegister.setOnClickListener {
-
             val email = binding.edtEmail.text.toString().trim()
             val password = binding.edtPassword.text.toString().trim()
             val confirmPassword = binding.edtConfirmPassword.text.toString().trim()
@@ -45,21 +46,22 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
             }
 
             viewModel.register(email, password) { success, error ->
+                if (!isAdded || view == null) return@register
+
                 if (success) {
                     val navOptions = androidx.navigation.NavOptions.Builder()
                         .setPopUpTo(R.id.registerFragment, true)
                         .build()
-
-                    findNavController().navigate(
-                        R.id.loginFragment,
-                        null,
-                        navOptions
-                    )
-
+                    findNavController().navigate(R.id.loginFragment, null, navOptions)
                 } else {
                     Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show()
                 }
             }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

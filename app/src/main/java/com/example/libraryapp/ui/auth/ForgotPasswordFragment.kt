@@ -10,17 +10,16 @@ import com.google.firebase.auth.FirebaseAuth
 
 class ForgotPasswordFragment : Fragment() {
 
-    private lateinit var binding: FragmentForgotPasswordBinding
+    private var _binding: FragmentForgotPasswordBinding? = null
+    private val binding get() = _binding!!
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentForgotPasswordBinding.inflate(inflater, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        _binding = FragmentForgotPasswordBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         binding.btnSendReset.setOnClickListener {
             val email = binding.edtEmail.text.toString().trim()
@@ -33,18 +32,20 @@ class ForgotPasswordFragment : Fragment() {
             FirebaseAuth.getInstance()
                 .sendPasswordResetEmail(email)
                 .addOnSuccessListener {
+
+                    if (!isAdded || _binding == null) return@addOnSuccessListener
+
                     binding.txtStatus.visibility = View.VISIBLE
-                    binding.txtStatus.setTextColor(
-                        android.graphics.Color.parseColor("#388E3C")
-                    )
+                    binding.txtStatus.setTextColor(android.graphics.Color.parseColor("#388E3C"))
                     binding.txtStatus.text = "Nếu email tồn tại, chúng tôi đã gửi link đặt lại đến $email\n(Kiểm tra cả thư mục Spam)"
                     binding.btnSendReset.isEnabled = false
                 }
                 .addOnFailureListener { e ->
+
+                    if (!isAdded || _binding == null) return@addOnFailureListener
+
                     binding.txtStatus.visibility = View.VISIBLE
-                    binding.txtStatus.setTextColor(
-                        android.graphics.Color.parseColor("#E53935")
-                    )
+                    binding.txtStatus.setTextColor(android.graphics.Color.parseColor("#E53935"))
                     binding.txtStatus.text = "Lỗi: ${e.message}"
                 }
         }
@@ -52,5 +53,10 @@ class ForgotPasswordFragment : Fragment() {
         binding.btnBack.setOnClickListener {
             findNavController().popBackStack()
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

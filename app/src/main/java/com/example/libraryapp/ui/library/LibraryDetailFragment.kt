@@ -35,9 +35,14 @@ class LibraryDetailFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-
+        super.onViewCreated(view, savedInstanceState)
         libraryId = arguments?.getString("libraryId") ?: return
+        val libraryName = arguments?.getString("libraryName") ?: "Thư viện"
+        binding.tvLibraryName.text = libraryName
 
+        binding.btnBack.setOnClickListener {
+            findNavController().popBackStack()
+        }
         binding.rvBooks.layoutManager =
             LinearLayoutManager(requireContext())
 

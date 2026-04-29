@@ -35,7 +35,7 @@
                 android:layout_gravity="top|start"
                 android:layout_margin="10dp"
                 android:background="@android:color/transparent"
-                android:src="@android:drawable/ic_media_previous"
+                android:src="@drawable/ic_arrow_back"
                 android:contentDescription="back" />
 
             <!-- FAVORITE -->
@@ -84,7 +84,7 @@
                 android:layout_width="0dp"
                 android:layout_height="48dp"
                 android:layout_weight="1"
-                android:text="Từ đầu"
+                android:text="Đoc từ đầu"
                 android:textAllCaps="false"
                 android:textColor="#4A6CF7"
                 android:backgroundTint="#E8EDFF" />
@@ -127,7 +127,9 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:fillViewport="true">
+        android:fillViewport="true"
+        android:clipToPadding="false"
+        android:paddingBottom="60dp">
 
         <LinearLayout
             android:layout_width="match_parent"

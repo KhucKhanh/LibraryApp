@@ -15,11 +15,4 @@ class AuthViewModel : ViewModel() {
         repo.register(email, password, onResult)
     }
 
-    fun isLoggedIn(): Boolean {
-        return repo.getCurrentUser() != null
-    }
-
-    fun logout() {
-        repo.logout()
-    }
 }

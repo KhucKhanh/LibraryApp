@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -10,18 +11,33 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="20dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="16dp"
         android:background="@drawable/bg_header">
+
+        <!-- BACK -->
+        <ImageButton
+            android:id="@+id/btnBack"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_arrow_back"
+            app:tint="@android:color/white"
+            android:contentDescription="back" />
 
         <TextView
             android:id="@+id/tvChapterTitle"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:text="Tên chương"
             android:textColor="@android:color/white"
-            android:textSize="22sp"
-            android:textStyle="bold"/>
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginStart="8dp"
+            android:ellipsize="end"
+            android:maxLines="1"/>
     </LinearLayout>
 
     <!-- ===== CONTENT ===== -->
@@ -38,7 +54,6 @@
             android:padding="16dp"
             android:orientation="vertical">
 
-            <!-- CARD CONTENT -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -53,56 +68,59 @@
                     android:layout_height="wrap_content"
                     android:textSize="18sp"
                     android:textColor="@color/text_primary"
-                    android:lineSpacingExtra="8dp"
-                    android:paddingBottom="60dp"/>
+                    android:lineSpacingExtra="8dp"/>
 
             </LinearLayout>
-
         </LinearLayout>
-
     </ScrollView>
 
-    <!-- ===== BOTTOM NAV ===== -->
+    <!-- ===== BOTTOM BUTTONS ===== -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="70dp"
+        android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="12dp"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
         android:background="@color/surface"
         android:elevation="8dp"
-        android:gravity="center">
+        android:gravity="center_vertical">
 
         <Button
             android:id="@+id/btnPrev"
             android:layout_width="0dp"
-            android:layout_height="48dp"
+            android:layout_height="44dp"
             android:layout_weight="1"
-            android:text="← Trước"
+            android:text="Chương trước"
             android:textAllCaps="false"
+            android:textSize="13sp"
             android:textColor="#4A6CF7"
             android:backgroundTint="#E8EDFF"/>
 
-        <Space
-            android:layout_width="12dp"
-            android:layout_height="wrap_content" />
-
-        <Button
-            android:id="@+id/btnNext"
-            android:layout_width="0dp"
-            android:layout_height="48dp"
-            android:layout_weight="1"
-            android:text="Tiếp →"
-            android:textAllCaps="false"
-            android:textColor="@android:color/white"
-            android:backgroundTint="#FFB300"/>
+        <Space android:layout_width="8dp" android:layout_height="wrap_content"/>
 
         <Button
             android:id="@+id/btnListen"
             android:layout_width="0dp"
-            android:layout_height="48dp"
+            android:layout_height="44dp"
             android:layout_weight="1"
-            android:text=" Nghe"
+            android:text="▶ Nghe"
             android:textAllCaps="false"
+            android:textSize="13sp"
+            android:textColor="#4A6CF7"
+            android:backgroundTint="#E8EDFF"/>
+
+        <Space android:layout_width="8dp" android:layout_height="wrap_content"/>
+
+        <Button
+            android:id="@+id/btnNext"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_weight="1"
+            android:text="Chương sau"
+            android:textAllCaps="false"
+            android:textSize="13sp"
             android:textColor="#4A6CF7"
             android:backgroundTint="#E8EDFF"/>
 

@@ -35,6 +35,7 @@ class ProfileFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         val user = FirebaseAuth.getInstance().currentUser
         val userId = user?.uid ?: return
 

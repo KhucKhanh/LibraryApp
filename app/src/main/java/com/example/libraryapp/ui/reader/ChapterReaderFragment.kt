@@ -105,6 +105,13 @@ class ChapterReaderFragment : Fragment() {
     }
 
     private fun setupButtons() {
+
+        binding.btnBack.setOnClickListener {
+            stopReading()
+            parentFragmentManager.popBackStack()
+        }
+
+
         binding.btnNext.setOnClickListener {
             stopReading()
             ttsManager.resetPosition()
@@ -136,7 +143,23 @@ class ChapterReaderFragment : Fragment() {
             Log.d("TTS", "Nút bấm - isReading=$isReading")
             if (isReading) stopReading() else startReading()
         }
+
+        viewModel.currentChapter.observe(viewLifecycleOwner) {
+            updateNavButtons()
+        }
     }
+
+    private fun updateNavButtons() {
+        val isFirst = viewModel.isFirstChapter()
+        val isLast = viewModel.isLastChapter()
+
+        binding.btnPrev.isEnabled = !isFirst
+        binding.btnPrev.alpha = if (isFirst) 0.4f else 1.0f
+
+        binding.btnNext.isEnabled = !isLast
+        binding.btnNext.alpha = if (isLast) 0.4f else 1.0f
+    }
+
 
     private fun startReading() {
         if (_binding == null) return

@@ -45,6 +45,7 @@ class EditProfileFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         val user = auth.currentUser ?: return
         val userId = user.uid
 
