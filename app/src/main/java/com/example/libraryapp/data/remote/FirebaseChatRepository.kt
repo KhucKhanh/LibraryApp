@@ -22,11 +22,11 @@ class FirebaseChatRepository {
             .collection("chats")
             .document(chatId)
 
-    fun saveMessage(userId: String, chatId: String, message: Message) {
+    fun saveMessage(userId: String, chatId: String, message: Message, timestamp: Long = System.currentTimeMillis()) {
         val data = hashMapOf(
             "text" to message.text,
             "isUser" to message.isUser,
-            "timestamp" to System.currentTimeMillis()
+            "timestamp" to timestamp
         )
         messagesRef(userId, chatId).add(data)
     }

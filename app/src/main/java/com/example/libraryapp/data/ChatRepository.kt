@@ -33,23 +33,24 @@ class ChatRepository(
 
             val aiText = response.choices.first().message.content
 
-            // ✅ Nếu là tin đầu tiên thì tạo metadata
             if (isFirstMessage) {
                 firebaseRepo.createChatMetadata(userId, chatId, userText)
             } else {
                 firebaseRepo.updateLastMessage(userId, chatId, userText)
             }
 
-            firebaseRepo.saveMessage(userId, chatId, Message(userText, true))
-            firebaseRepo.saveMessage(userId, chatId, Message(aiText, false))
+            val userTime = System.currentTimeMillis()
+            firebaseRepo.saveMessage(userId, chatId, Message(userText, true), userTime)
+            firebaseRepo.saveMessage(userId, chatId, Message(aiText, false), userTime + 1)
 
             Log.d("GROQ_REQUEST", request.toString())
             aiText
 
         } catch (e: Exception) {
             val errorText = "Error: ${e.message}"
-            firebaseRepo.saveMessage(userId, chatId, Message(userText, true))
-            firebaseRepo.saveMessage(userId, chatId, Message(errorText, false))
+            val userTime = System.currentTimeMillis()
+            firebaseRepo.saveMessage(userId, chatId, Message(userText, true), userTime)
+            firebaseRepo.saveMessage(userId, chatId, Message(errorText, false), userTime + 1)
             errorText
         }
     }
