@@ -17,6 +17,13 @@ object SimpleRAGEngine {
         if (key == lastKey) return
         lastKey = key
 
+        // Kiểm tra Firestore — nếu đã có chunk thì bỏ qua, không embed lại
+        val existing = FirestoreRAGRepository.getChunkCount(bookId, chapterTitle)
+        if (existing > 0) {
+            Log.d("RAG_DEBUG", "Chapter already indexed ($existing chunks), skip")
+            return
+        }
+
         val chunks = chunkContent(content)
         withContext(Dispatchers.IO) {
             FirestoreRAGRepository.saveChunks(bookId, chapterTitle, chunks)
@@ -30,51 +37,58 @@ object SimpleRAGEngine {
         filterToCurrentBook: Boolean = false
     ): List<RetrievedChunk> {
 
-        Log.d("RAG_DEBUG", "🔍 retrieve() called, query=$query")
+        Log.d("RAG_DEBUG", "retrieve() called, query=$query")
 
         val allChunks = withContext(Dispatchers.IO) {
             FirestoreRAGRepository.getAllChunks()
         }
 
-        Log.d("RAG_DEBUG", "📦 Total chunks fetched: ${allChunks.size}")
+        Log.d("RAG_DEBUG", "Total chunks fetched: ${allChunks.size}")
 
         if (allChunks.isEmpty()) {
-            Log.e("RAG_DEBUG", "❌ No chunks found!")
+            Log.e("RAG_DEBUG", "No chunks found!")
             return emptyList()
         }
 
-        val chunks = if (filterToCurrentBook && currentBookId.isNotBlank()) {
-            Log.d("RAG_DEBUG", "🔖 Filtering to currentBookId=$currentBookId")
-            allChunks.filter { it.bookId == currentBookId }
-        } else {
-            allChunks
+        val chunks = when {
+            // Chế độ trong sách: chỉ lấy chunk của sách hiện tại
+            filterToCurrentBook && currentBookId.isNotBlank() -> {
+                Log.d("RAG_DEBUG", "Filtering to currentBookId=$currentBookId")
+                allChunks.filter { it.bookId == currentBookId }
+            }
+            // Chế độ cross-book: loại bỏ sách hiện tại để tránh tự so sánh với chính nó
+            !filterToCurrentBook && currentBookId.isNotBlank() -> {
+                Log.d("RAG_DEBUG", "Cross-book: excluding currentBookId=$currentBookId")
+                allChunks.filter { it.bookId != currentBookId }
+            }
+            else -> allChunks
         }
 
-        Log.d("RAG_DEBUG", "📦 Candidate chunks after filter: ${chunks.size}")
+        Log.d("RAG_DEBUG", "Candidate chunks after filter: ${chunks.size}")
 
         if (chunks.isEmpty()) {
-            Log.w("RAG_DEBUG", "⚠️ No chunks after filter, fallback to all")
+            Log.w("RAG_DEBUG", "No chunks after filter, fallback to all")
             return fallbackRetrieve(query, allChunks, topK)
         }
 
         val queryVector = try {
-            Log.d("RAG_DEBUG", "⏳ Bắt đầu gọi EmbeddingClient.embed()")
-            Log.d("RAG_DEBUG", "⏳ isActive: ${coroutineContext[kotlinx.coroutines.Job]?.isActive}")
+            Log.d("RAG_DEBUG", "Bắt đầu gọi EmbeddingClient.embed()")
+            Log.d("RAG_DEBUG", "isActive: ${coroutineContext[kotlinx.coroutines.Job]?.isActive}")
 
             val v = withTimeoutOrNull(5000L) {
                 withContext(Dispatchers.IO) {
                     EmbeddingClient.embed(query)
                 }
             }
-            Log.d("RAG_DEBUG", "⏳ Sau embed, v null? ${v == null}")
+            Log.d("RAG_DEBUG", "Sau embed, v null? ${v == null}")
             if (v == null) {
-                Log.e("RAG_DEBUG", "❌ QueryVector NULL — timeout hoặc embed() trả null")
+                Log.e("RAG_DEBUG", "QueryVector NULL — timeout hoặc embed() trả null")
             } else {
-                Log.d("RAG_DEBUG", "🧮 QueryVector OK, size=${v.size}")
+                Log.d("RAG_DEBUG", "QueryVector OK, size=${v.size}")
             }
             v
         } catch (e: Exception) {
-            Log.e("RAG_DEBUG", "❌ Embed query EXCEPTION: ${e.message}", e)
+            Log.e("RAG_DEBUG", "Embed query EXCEPTION: ${e.message}", e)
             null
         }
 
@@ -82,7 +96,7 @@ object SimpleRAGEngine {
 
         val scored = chunks.map { chunk ->
             val score = cosineSimilarity(queryVector, chunk.embedding)
-            Log.d("RAG_DEBUG", "📊 score=$score | book=${chunk.bookId} | chapter=${chunk.chapter}")
+            Log.d("RAG_DEBUG", "score=$score | book=${chunk.bookId} | chapter=${chunk.chapter}")
             RetrievedChunk(
                 text = chunk.text,
                 bookId = chunk.bookId,
@@ -96,9 +110,9 @@ object SimpleRAGEngine {
             .distinctBy { it.text }
             .take(topK)
 
-        Log.d("RAG_DEBUG", "✅ Final top ${result.size} chunks")
+        Log.d("RAG_DEBUG", "Final top ${result.size} chunks")
         result.forEach {
-            Log.d("RAG_DEBUG", "🏆 book=${it.bookId} | chapter=${it.chapter} | score=${it.score}")
+            Log.d("RAG_DEBUG", "book=${it.bookId} | chapter=${it.chapter} | score=${it.score}")
         }
 
         return result
@@ -154,12 +168,12 @@ object SimpleRAGEngine {
         chunks: List<ChunkData>,
         topK: Int
     ): List<RetrievedChunk> {
-        Log.w("RAG_DEBUG", "⚠️ Using Jaccard fallback")
+        Log.w("RAG_DEBUG", "Using Jaccard fallback")
         val queryWords = tokenize(query)
         val results = chunks
             .map { chunk ->
                 val score = jaccardSimilarity(queryWords, tokenize(chunk.text))
-                Log.d("RAG_DEBUG", "📊 Jaccard score=$score | book=${chunk.bookId} | chapter=${chunk.chapter}")
+                Log.d("RAG_DEBUG", "Jaccard score=$score | book=${chunk.bookId} | chapter=${chunk.chapter}")
                 RetrievedChunk(
                     text = chunk.text,
                     bookId = chunk.bookId,
@@ -171,7 +185,7 @@ object SimpleRAGEngine {
             .distinctBy { it.text }
             .take(topK)
 
-        Log.d("RAG_DEBUG", "✅ Fallback result: ${results.size} chunks")
+        Log.d("RAG_DEBUG", "Fallback result: ${results.size} chunks")
         return results
     }
 }

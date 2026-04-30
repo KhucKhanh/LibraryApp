@@ -22,14 +22,16 @@ object ChapterReaderPrompt {
         Log.d("RAG_DEBUG", "User question: $userMessage")
 
         if (!context.chapterContent.isNullOrBlank()) {
-            Log.d("RAG_DEBUG", "➡️ Calling indexChapter...")
+            Log.d("RAG_DEBUG", "Calling indexChapter...")
             SimpleRAGEngine.indexChapter(bookId, chapterName, context.chapterContent)
-            Log.d("RAG_DEBUG", "✅ indexChapter done")
+            Log.d("RAG_DEBUG", "indexChapter done")
         } else {
-            Log.w("RAG_DEBUG", "⚠️ chapterContent null/blank, skip index")
+            Log.w("RAG_DEBUG", "chapterContent null/blank, skip index")
         }
 
         val isCrossBook = listOf(
+            "giong", "giống",
+            "khác", "khac",
             "so sánh", "so sanh",
             "compare",
             "khác nhau", "khac nhau",
@@ -56,10 +58,10 @@ object ChapterReaderPrompt {
                 result
             }
 
-            Log.d("RAG_DEBUG", "✅ Retrieved ${final.size} chunks (crossBook=$isCrossBook)")
+            Log.d("RAG_DEBUG", "Retrieved ${final.size} chunks (crossBook=$isCrossBook)")
             final
         } catch (e: Exception) {
-            Log.e("RAG_DEBUG", "❌ Retrieve FAILED: ${e.message}")
+            Log.e("RAG_DEBUG", "Retrieve FAILED: ${e.message}")
             emptyList()
         }
 
@@ -72,7 +74,7 @@ object ChapterReaderPrompt {
             }
             sourceLabel = "[Ngữ cảnh được truy xuất bằng RAG — ${retrievedChunks.size} đoạn]"
         } else {
-            Log.w("RAG_DEBUG", "⚠️ RAG empty, dùng fallback content")
+            Log.w("RAG_DEBUG", "RAG empty, dùng fallback content")
             finalContext = context.chapterContent?.take(1200)
                 ?: "Không có nội dung chương."
             sourceLabel = "[Fallback: nội dung đầu chương hiện tại]"
