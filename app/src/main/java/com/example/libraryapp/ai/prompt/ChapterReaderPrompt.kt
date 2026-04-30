@@ -159,7 +159,7 @@ object ChapterReaderPrompt {
             retrievedChunks.isNotEmpty() ->
                 "[Partial chapter content + RAG ${retrievedChunks.size} chunks]"
             isShortChapter ->
-                "[Full chapter content — không cần RAG]"
+                "[Full chapter content]"
             else ->
                 "[Partial chapter content — RAG không tìm được kết quả]"
         }

@@ -3,7 +3,9 @@ package com.example.libraryapp.ai
 import android.util.Log
 import com.example.libraryapp.data.remote.EmbeddingClient
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
@@ -11,16 +13,24 @@ object FirestoreRAGRepository {
 
     private val db = FirebaseFirestore.getInstance()
 
+    // ── Cache in-memory ──────────────────────────────────────────────────────
+    private val chunksCache = mutableListOf<ChunkData>()
+    private var cacheLoaded = false
+    private val indexedChapters = mutableSetOf<String>() // key = "bookId-chapter"
+
     suspend fun getChunkCount(bookId: String, chapter: String): Int {
+        val key = "$bookId-$chapter"
+        if (key in indexedChapters) return 1
         return try {
             val snapshot = withContext(Dispatchers.IO) {
                 db.collection("book_chunks")
                     .whereEqualTo("bookId", bookId)
                     .whereEqualTo("chapter", chapter)
-                    .get()
-                    .await()
+                    .get().await()
             }
-            snapshot.size()
+            val count = snapshot.size()
+            if (count > 0) indexedChapters.add(key)
+            count
         } catch (e: Exception) {
             Log.e("RAG_DEBUG", "getChunkCount failed: ${e.message}")
             0
@@ -29,25 +39,14 @@ object FirestoreRAGRepository {
 
     suspend fun saveChunks(bookId: String, chapter: String, chunks: List<String>) {
         Log.d("RAG_DEBUG", "saveChunks START")
+        val key = "$bookId-$chapter"
 
         for ((index, chunk) in chunks.withIndex()) {
-            Log.d("RAG_DEBUG", "Chunk $index, length=${chunk.length}")
-
-            if (chunk.length < 100) {
-                Log.w("RAG_DEBUG", "Skip short chunk")
-                continue
-            }
+            if (chunk.length < 100) continue
 
             val embedding = withContext(Dispatchers.IO) {
                 EmbeddingClient.embed(chunk)
-            }
-
-            if (embedding == null) {
-                Log.e("RAG_DEBUG", "Embedding FAILED at chunk $index")
-                continue
-            }
-
-            Log.d("RAG_DEBUG", "Embedding OK (${embedding.size})")
+            } ?: continue
 
             val data = ChunkData(
                 bookId = bookId,
@@ -57,34 +56,47 @@ object FirestoreRAGRepository {
                 chunkIndex = index
             )
 
-            try {
-                withContext(Dispatchers.IO) {
+            chunksCache.add(data)
+
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
                     db.collection("book_chunks")
                         .document("$bookId-$chapter-$index")
                         .set(data)
                         .await()
+                } catch (e: Exception) {
+                    Log.e("RAG_DEBUG", "Firestore save failed: ${e.message}")
                 }
-                Log.d("RAG_DEBUG", "Saved chunk $index")
-            } catch (e: Exception) {
-                Log.e("RAG_DEBUG", "Firestore save FAILED: ${e.message}")
             }
         }
 
-        Log.d("RAG_DEBUG", "saveChunks END")
+        indexedChapters.add(key)
+        Log.d("RAG_DEBUG", "saveChunks END (cache size=${chunksCache.size})")
     }
 
     suspend fun getAllChunks(): List<ChunkData> {
-        Log.d("RAG_DEBUG", "getAllChunks called")
+        if (cacheLoaded) {
+            Log.d("RAG_DEBUG", "getAllChunks from cache: ${chunksCache.size}")
+            return chunksCache.toList()
+        }
+
+        Log.d("RAG_DEBUG", "getAllChunks called (first time)")
         return withContext(Dispatchers.IO) {
             val snapshot = db.collection("book_chunks").get().await()
             Log.d("RAG_DEBUG", "getAllChunks docs: ${snapshot.documents.size}")
-            snapshot.documents.mapNotNull { doc ->
-                try { doc.toObject(ChunkData::class.java) }
-                catch (e: Exception) {
-                    Log.e("RAG_DEBUG", "Parse error: ${e.message}")
-                    null
-                }
+            val loaded = snapshot.documents.mapNotNull {
+                try { it.toObject(ChunkData::class.java) } catch (e: Exception) { null }
             }
+            chunksCache.clear()
+            chunksCache.addAll(loaded)
+            cacheLoaded = true
+            chunksCache.toList()
         }
+    }
+
+    fun clearCache() {
+        chunksCache.clear()
+        indexedChapters.clear()
+        cacheLoaded = false
     }
 }
