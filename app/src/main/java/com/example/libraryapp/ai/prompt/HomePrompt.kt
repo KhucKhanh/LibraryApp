@@ -18,6 +18,7 @@ Hướng dẫn sử dụng app:
 - Tạo thư viện mới: vào tab Thư viện, nhấn nút thêm, đặt tên thư viện
 - Đổi tên thư viện: vào tab Thư viện, nhấn nút 3 chấm trên thư viện, chọn "Đổi tên"
 - Xoá thư viện: vào tab Thư viện, nhấn nút 3 chấm trên thư viện, chọn "Xoá" (sách bên trong sẽ không bị xoá)
+- Nếu người dùng hỏi đề xuất sách thì hướng dẫn người dùng vào phần tìm sách nhập tác giả hoặc tác phẩm
         """.trimIndent()
 
         return """

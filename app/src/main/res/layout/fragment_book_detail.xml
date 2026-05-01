@@ -83,15 +83,12 @@
                 android:id="@+id/btnReadFromStart"
                 android:layout_width="0dp"
                 android:layout_height="48dp"
-                android:layout_weight="1"
+                android:layout_weight="1.2"
                 android:text="Đọc từ đầu"
+
                 android:textAllCaps="false"
                 android:textColor="#4A6CF7"
                 android:backgroundTint="#E8EDFF" />
-
-            <Space
-                android:layout_width="4dp"
-                android:layout_height="wrap_content"/>
 
             <!-- ĐỌC TIẾP -->
             <Button
@@ -101,12 +98,9 @@
                 android:layout_weight="1"
                 android:text="Đọc tiếp"
                 android:textAllCaps="false"
-                android:textColor="@android:color/white"
-                android:backgroundTint="#FFB300" />
+                android:textColor="#4A6CF7"
+                android:backgroundTint="#E8EDFF" />
 
-            <Space
-                android:layout_width="4dp"
-                android:layout_height="wrap_content"/>
 
             <Button
                 android:id="@+id/btnAddToLibrary"
@@ -118,10 +112,6 @@
                 android:textColor="@android:color/white"
                 android:backgroundTint="#4CAF50" />
 
-            <Space
-                android:layout_width="4dp"
-                android:layout_height="wrap_content"/>
-
             <Button
                 android:id="@+id/btnShare"
                 android:layout_width="0dp"
@@ -129,8 +119,8 @@
                 android:layout_weight="1"
                 android:text="Chia sẻ"
                 android:textAllCaps="false"
-                android:textColor="#4A6CF7"
-                android:backgroundTint="#E8EDFF" />
+                android:textColor="@android:color/white"
+                android:backgroundTint="#4CAF50" />
 
 
         </LinearLayout>
