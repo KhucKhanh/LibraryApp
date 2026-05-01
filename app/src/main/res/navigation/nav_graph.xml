@@ -63,6 +63,9 @@
         <action
             android:id="@+id/action_profileFragment_to_editProfileFragment"
             app:destination="@id/editProfileFragment" />
+        <action
+            android:id="@+id/action_profileFragment_to_bookShareInboxFragment"
+            app:destination="@id/bookShareInboxFragment" />
     </fragment>
 
     <fragment
@@ -98,5 +101,16 @@
         android:name="com.example.libraryapp.ui.friend.FriendFragment"
         android:label="Bạn bè"
         tools:layout="@layout/fragment_friend"/>
+
+
+    <fragment
+        android:id="@+id/bookShareInboxFragment"
+        android:name="com.example.libraryapp.ui.profile.BookShareInboxFragment"
+        android:label="Thông báo sách">
+        <action
+            android:id="@+id/action_bookShareInboxFragment_to_bookDetailFragment"
+            app:destination="@id/bookDetailFragment" />
+    </fragment>
+
 
 </navigation>

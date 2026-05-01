@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF">
+    android:background="@color/background">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -28,7 +28,7 @@
                 android:text="Bạn bè"
                 android:textSize="20sp"
                 android:textStyle="bold"
-                android:textColor="#212121"/>
+                android:textColor="@color/text_primary"/>
 
             <FrameLayout
                 android:layout_width="wrap_content"
@@ -49,7 +49,7 @@
                     android:layout_gravity="top|end"
                     android:background="@drawable/bg_badge"
                     android:gravity="center"
-                    android:textColor="#FFFFFF"
+                    android:textColor="@android:color/white"
                     android:textSize="10sp"
                     android:textStyle="bold"
                     android:visibility="gone"/>
@@ -72,7 +72,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardCornerRadius="12dp"
-                app:cardElevation="2dp">
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="@color/surface">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -86,7 +87,7 @@
                         android:text="Tìm bạn qua email"
                         android:textSize="14sp"
                         android:textStyle="bold"
-                        android:textColor="#212121"
+                        android:textColor="@color/text_primary"
                         android:layout_marginBottom="8dp"/>
 
                     <LinearLayout
@@ -108,16 +109,16 @@
                             android:padding="10dp"
                             android:textSize="14sp"
                             android:background="@drawable/bg_edittext_outline"
-                            android:textColor="#212121"
-                            android:textColorHint="#9E9E9E"/>
+                            android:textColor="@color/text_primary"
+                            android:textColorHint="@color/text_secondary"/>
 
                         <Button
                             android:id="@+id/btnDoSearch"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Tìm"
-                            android:textColor="#FFFFFF"
-                            android:backgroundTint="#1976D2"/>
+                            android:textColor="@android:color/white"
+                            android:backgroundTint="@color/primary"/>
 
                     </LinearLayout>
 
@@ -134,7 +135,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:textColor="#D32F2F"
+                        android:textColor="@color/text_secondary"
                         android:textSize="13sp"
                         android:visibility="gone"/>
 
@@ -147,7 +148,7 @@
                         android:gravity="center_vertical"
                         android:layout_marginTop="12dp"
                         android:padding="8dp"
-                        android:background="#F5F5F5"
+                        android:background="@color/surface"
                         android:visibility="gone">
 
                         <ImageView
@@ -171,14 +172,14 @@
                                 android:layout_height="wrap_content"
                                 android:textStyle="bold"
                                 android:textSize="15sp"
-                                android:textColor="#212121"/>
+                                android:textColor="@color/text_primary"/>
 
                             <TextView
                                 android:id="@+id/tvResultEmail"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:textSize="12sp"
-                                android:textColor="#757575"/>
+                                android:textColor="@color/text_secondary"/>
                         </LinearLayout>
 
                         <Button
@@ -187,8 +188,8 @@
                             android:layout_height="wrap_content"
                             android:text="Kết bạn"
                             android:textSize="12sp"
-                            android:textColor="#FFFFFF"
-                            android:backgroundTint="#1976D2"
+                            android:textColor="@android:color/white"
+                            android:backgroundTint="@color/primary"
                             android:visibility="gone"/>
 
                         <Button
@@ -197,8 +198,8 @@
                             android:layout_height="wrap_content"
                             android:text="Hủy lời mời"
                             android:textSize="12sp"
-                            android:textColor="#1976D2"
-                            android:backgroundTint="#E3F2FD"
+                            android:textColor="@color/primary"
+                            android:backgroundTint="@color/surface"
                             android:visibility="gone"/>
 
                         <Button
@@ -207,8 +208,8 @@
                             android:layout_height="wrap_content"
                             android:text="Chấp nhận"
                             android:textSize="12sp"
-                            android:textColor="#FFFFFF"
-                            android:backgroundTint="#388E3C"
+                            android:textColor="@android:color/white"
+                            android:backgroundTint="@color/primary"
                             android:visibility="gone"/>
 
                         <Button
@@ -218,8 +219,8 @@
                             android:text="Bạn bè ✓"
                             android:textSize="12sp"
                             android:enabled="false"
-                            android:textColor="#757575"
-                            android:backgroundTint="#EEEEEE"
+                            android:textColor="@color/text_secondary"
+                            android:backgroundTint="@color/surface"
                             android:visibility="gone"/>
 
                     </LinearLayout>
@@ -227,7 +228,7 @@
             </androidx.cardview.widget.CardView>
         </LinearLayout>
 
-        <!-- Section: Lời mời kết bạn -->
+        <!-- Requests -->
         <LinearLayout
             android:id="@+id/sectionRequests"
             android:layout_width="match_parent"
@@ -241,11 +242,8 @@
                 android:text="Lời mời kết bạn"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                android:textColor="#212121"
-                android:paddingLeft="16dp"
-                android:paddingRight="16dp"
-                android:paddingTop="8dp"
-                android:paddingBottom="4dp"/>
+                android:textColor="@color/text_primary"
+                android:padding="16dp"/>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvRequests"
@@ -257,20 +255,18 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_marginLeft="16dp"
-                android:layout_marginRight="16dp"
-                android:layout_marginTop="12dp"
-                android:background="#E0E0E0"/>
+                android:layout_margin="16dp"
+                android:background="@color/divider"/>
         </LinearLayout>
 
-        <!-- Section: Danh sách bạn bè -->
+        <!-- Empty -->
         <TextView
             android:id="@+id/tvEmptyFriends"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Chưa có bạn bè nào.\nTìm kiếm qua email để thêm bạn!"
             android:gravity="center"
-            android:textColor="#757575"
+            android:textColor="@color/text_secondary"
             android:textSize="14sp"
             android:paddingTop="48dp"
             android:visibility="gone"/>
@@ -280,7 +276,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:nestedScrollingEnabled="false"
-            android:paddingTop="4dp"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
 
     </LinearLayout>

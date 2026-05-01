@@ -144,7 +144,7 @@ class ProfileFragment : Fragment() {
         }
 
         binding.btnBookShareInbox.setOnClickListener {
-//
+            findNavController().navigate(R.id.action_profileFragment_to_bookShareInboxFragment)
         }
 
 
