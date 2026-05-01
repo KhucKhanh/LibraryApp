@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="24dp">
+
+        <!-- Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/tvFriendCount"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Bạn bè"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="#212121"/>
+
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <ImageButton
+                    android:id="@+id/btnSearch"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_person_search"
+                    android:contentDescription="Tìm kiếm bạn bè"/>
+
+                <TextView
+                    android:id="@+id/tvRequestBadge"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:layout_gravity="top|end"
+                    android:background="@drawable/bg_badge"
+                    android:gravity="center"
+                    android:textColor="#FFFFFF"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:visibility="gone"/>
+            </FrameLayout>
+
+        </LinearLayout>
+
+        <!-- Search Panel -->
+        <LinearLayout
+            android:id="@+id/searchPanel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:paddingBottom="8dp"
+            android:visibility="gone">
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Tìm bạn qua email"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="#212121"
+                        android:layout_marginBottom="8dp"/>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <EditText
+                            android:id="@+id/etEmail"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="8dp"
+                            android:hint="Email người dùng"
+                            android:inputType="textEmailAddress"
+                            android:imeOptions="actionSearch"
+                            android:singleLine="true"
+                            android:padding="10dp"
+                            android:textSize="14sp"
+                            android:background="@drawable/bg_edittext_outline"
+                            android:textColor="#212121"
+                            android:textColorHint="#9E9E9E"/>
+
+                        <Button
+                            android:id="@+id/btnDoSearch"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Tìm"
+                            android:textColor="#FFFFFF"
+                            android:backgroundTint="#1976D2"/>
+
+                    </LinearLayout>
+
+                    <ProgressBar
+                        android:id="@+id/progressSearch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="12dp"
+                        android:visibility="gone"/>
+
+                    <TextView
+                        android:id="@+id/tvSearchEmpty"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:textColor="#D32F2F"
+                        android:textSize="13sp"
+                        android:visibility="gone"/>
+
+                    <!-- Kết quả tìm kiếm -->
+                    <LinearLayout
+                        android:id="@+id/searchResultCard"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginTop="12dp"
+                        android:padding="8dp"
+                        android:background="#F5F5F5"
+                        android:visibility="gone">
+
+                        <ImageView
+                            android:id="@+id/ivResultAvatar"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:scaleType="centerCrop"
+                            android:background="@drawable/bg_avatar_circle"/>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:layout_marginLeft="12dp"
+                            android:layout_marginRight="8dp">
+
+                            <TextView
+                                android:id="@+id/tvResultName"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textStyle="bold"
+                                android:textSize="15sp"
+                                android:textColor="#212121"/>
+
+                            <TextView
+                                android:id="@+id/tvResultEmail"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="12sp"
+                                android:textColor="#757575"/>
+                        </LinearLayout>
+
+                        <Button
+                            android:id="@+id/btnAddFriend"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Kết bạn"
+                            android:textSize="12sp"
+                            android:textColor="#FFFFFF"
+                            android:backgroundTint="#1976D2"
+                            android:visibility="gone"/>
+
+                        <Button
+                            android:id="@+id/btnCancelRequest"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Hủy lời mời"
+                            android:textSize="12sp"
+                            android:textColor="#1976D2"
+                            android:backgroundTint="#E3F2FD"
+                            android:visibility="gone"/>
+
+                        <Button
+                            android:id="@+id/btnAcceptFromSearch"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Chấp nhận"
+                            android:textSize="12sp"
+                            android:textColor="#FFFFFF"
+                            android:backgroundTint="#388E3C"
+                            android:visibility="gone"/>
+
+                        <Button
+                            android:id="@+id/btnAlreadyFriend"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Bạn bè ✓"
+                            android:textSize="12sp"
+                            android:enabled="false"
+                            android:textColor="#757575"
+                            android:backgroundTint="#EEEEEE"
+                            android:visibility="gone"/>
+
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+        </LinearLayout>
+
+        <!-- Section: Lời mời kết bạn -->
+        <LinearLayout
+            android:id="@+id/sectionRequests"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Lời mời kết bạn"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#212121"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="4dp"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvRequests"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp"
+                android:layout_marginTop="12dp"
+                android:background="#E0E0E0"/>
+        </LinearLayout>
+
+        <!-- Section: Danh sách bạn bè -->
+        <TextView
+            android:id="@+id/tvEmptyFriends"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Chưa có bạn bè nào.\nTìm kiếm qua email để thêm bạn!"
+            android:gravity="center"
+            android:textColor="#757575"
+            android:textSize="14sp"
+            android:paddingTop="48dp"
+            android:visibility="gone"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvFriends"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:nestedScrollingEnabled="false"
+            android:paddingTop="4dp"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

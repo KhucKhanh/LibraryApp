@@ -106,7 +106,6 @@ class ProfileFragment : Fragment() {
         val savedMinute = sharedPref.getInt("reminder_minute", -1)
         binding.switchNotification.isChecked = sharedPref.getBoolean("reminder_enabled", false)
 
-// Hiển thị giờ đang đặt (nếu có) — xem bước 8 để thêm TextView vào layout
         if (savedHour != -1) {
             val timeText = String.format("Nhắc lúc %02d:%02d", savedHour, savedMinute)
             binding.txtReminderTime.text = timeText
@@ -129,7 +128,6 @@ class ProfileFragment : Fragment() {
                 }
                 showTimePicker()
             } else {
-                // Tắt nhắc nhở
                 sharedPref.edit()
                     .putBoolean("reminder_enabled", false)
                     .remove("reminder_hour")
@@ -140,6 +138,15 @@ class ProfileFragment : Fragment() {
                 Toast.makeText(requireContext(), "Đã tắt nhắc nhở đọc sách", Toast.LENGTH_SHORT).show()
             }
         }
+
+        binding.btnFriendInbox.setOnClickListener {
+            findNavController().navigate(R.id.action_profileFragment_to_friendFragment)
+        }
+
+        binding.btnBookShareInbox.setOnClickListener {
+//
+        }
+
 
     }
 

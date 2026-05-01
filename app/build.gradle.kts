@@ -8,6 +8,7 @@ plugins {
     kotlin("kapt")
 
     id("com.google.gms.google-services")
+    id("androidx.navigation.safeargs.kotlin") version "2.7.7" apply false
 }
 
 val localProperties = Properties()
