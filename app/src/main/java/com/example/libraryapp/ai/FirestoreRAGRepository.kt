@@ -14,9 +14,9 @@ object FirestoreRAGRepository {
     private val db = FirebaseFirestore.getInstance()
 
     // ── Cache in-memory ──────────────────────────────────────────────────────
-    private val chunksCache = mutableListOf<ChunkData>()
-    private var cacheLoaded = false
-    private val indexedChapters = mutableSetOf<String>() // key = "bookId-chapter"
+    internal val chunksCache = mutableListOf<ChunkData>()
+    internal var cacheLoaded = false
+    private val indexedChapters = mutableSetOf<String>()
 
     suspend fun getChunkCount(bookId: String, chapter: String): Int {
         val key = "$bookId-$chapter"
@@ -98,5 +98,56 @@ object FirestoreRAGRepository {
         chunksCache.clear()
         indexedChapters.clear()
         cacheLoaded = false
+    }
+
+
+    suspend fun saveBookMetadata(bookId: String, title: String, author: String, description: String) {
+        val key = "meta-$bookId"
+        if (key in indexedChapters) return  // tái dùng set đã có
+
+        // Kiểm tra Firestore
+        val existing = try {
+            val snap = withContext(Dispatchers.IO) {
+                db.collection("book_chunks")
+                    .whereEqualTo("bookId", bookId)
+                    .whereEqualTo("chapter", "__metadata__")
+                    .get().await()
+            }
+            snap.size()
+        } catch (e: Exception) { 0 }
+
+        if (existing > 0) {
+            indexedChapters.add(key)
+            return
+        }
+
+        val metaText = "Sách: $title. Tác giả: $author. Nội dung: $description"
+        if (metaText.length < 20) return
+
+        val embedding = withContext(Dispatchers.IO) {
+            EmbeddingClient.embed(metaText)
+        } ?: return
+
+        val data = ChunkData(
+            bookId = bookId,
+            chapter = "__metadata__",
+            text = metaText,
+            embedding = embedding,
+            chunkIndex = 0
+        )
+
+        chunksCache.add(data)
+        indexedChapters.add(key)
+
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                db.collection("book_chunks")
+                    .document("$bookId-metadata")
+                    .set(data)
+                    .await()
+            } catch (e: Exception) {
+                Log.e("RAG_DEBUG", "saveBookMetadata failed: ${e.message}")
+            }
+        }
     }
 }

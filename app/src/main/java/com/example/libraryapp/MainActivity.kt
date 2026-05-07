@@ -11,6 +11,9 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.example.libraryapp.ui.chat.ChatBottomSheet
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
@@ -31,12 +34,27 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+
+        val user = FirebaseAuth.getInstance().currentUser
+
+        if (user != null) {
+            lifecycleScope.launch(Dispatchers.IO) {
+                try {
+                    com.example.libraryapp.ai.FirestoreRAGRepository.getAllChunks()
+                    android.util.Log.d("CHAT_DEBUG", "Cache preloaded: ${com.example.libraryapp.ai.FirestoreRAGRepository.chunksCache.size} chunks")
+                } catch (e: Exception) {
+                    android.util.Log.e("CHAT_DEBUG", "Preload failed: ${e.message}")
+                }
+            }
+        }
+
+
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         val navController = navHostFragment.navController
 
         val graph = navController.navInflater.inflate(R.navigation.nav_graph)
-        val user = FirebaseAuth.getInstance().currentUser
+
         graph.setStartDestination(
             if (user != null) R.id.homeFragment else R.id.loginFragment
         )

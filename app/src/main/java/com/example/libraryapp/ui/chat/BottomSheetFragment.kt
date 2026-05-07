@@ -97,13 +97,17 @@ class ChatBottomSheet : BottomSheetDialogFragment() {
                 isFirstMessage = isFirstMessage,
                 history = history
             ) { reply ->
-                requireActivity().runOnUiThread {
+                activity?.runOnUiThread {
                     if (!isAdded || _binding == null) return@runOnUiThread
                     messages.add(Message(reply, false))
                     chatAdapter.notifyItemInserted(messages.size - 1)
                     binding.rvChat.scrollToPosition(messages.size - 1)
                 }
             }
+
+            android.util.Log.d("CHAT_DEBUG", "Send clicked | text=$text")
+            android.util.Log.d("CHAT_DEBUG", "Screen=${contextSnapshot.screen} | book=${contextSnapshot.book?.title}")
+
         }
     }
 

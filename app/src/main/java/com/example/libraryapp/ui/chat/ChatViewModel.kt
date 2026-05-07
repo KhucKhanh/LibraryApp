@@ -63,12 +63,16 @@ class ChatViewModel : ViewModel() {
     ) {
         viewModelScope.launch {
             try {
+                android.util.Log.d("CHAT_DEBUG", "buildAndSend START")
+
                 val systemPrompt = ScreenPromptBuilder.build(contextSnapshot, text)
+
+                android.util.Log.d("CHAT_DEBUG", "Prompt built, length=${systemPrompt.length}")
 
                 val requestMessages = mutableListOf<MessageRequest>()
                 requestMessages.add(MessageRequest(role = "system", content = systemPrompt))
 
-                history.dropLast(0).takeLast(10).forEach { msg ->
+                history.takeLast(6).forEach { msg ->
                     requestMessages.add(
                         MessageRequest(
                             role = if (msg.isUser) "user" else "assistant",
@@ -79,6 +83,7 @@ class ChatViewModel : ViewModel() {
 
                 requestMessages.add(MessageRequest(role = "user", content = text))
 
+                android.util.Log.d("CHAT_DEBUG", "Sending to API...")
                 val reply = repo.sendMessage(
                     userId = userId,
                     chatId = chatId,
@@ -86,11 +91,14 @@ class ChatViewModel : ViewModel() {
                     userText = text,
                     isFirstMessage = isFirstMessage
                 )
+
+                android.util.Log.d("CHAT_DEBUG", "Got reply: ${reply.take(50)}")
                 onReply(reply)
             } catch (e: Exception) {
+                // ← thêm log chi tiết
+                android.util.Log.e("CHAT_DEBUG", "buildAndSend FAILED: ${e::class.simpleName}: ${e.message}", e)
                 onReply("Lỗi: ${e.message}")
             }
         }
     }
-
 }

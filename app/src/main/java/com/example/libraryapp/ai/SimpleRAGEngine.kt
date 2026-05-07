@@ -11,6 +11,7 @@ import kotlin.math.sqrt
 object SimpleRAGEngine {
 
     private var lastKey: String = ""
+    private val queryCache = mutableMapOf<String, List<Float>>()
 
     suspend fun indexChapter(bookId: String, chapterTitle: String, content: String) {
         val key = "$bookId-$chapterTitle"
@@ -72,21 +73,24 @@ object SimpleRAGEngine {
         }
 
         val queryVector = try {
-            Log.d("RAG_DEBUG", "Bắt đầu gọi EmbeddingClient.embed()")
-            Log.d("RAG_DEBUG", "isActive: ${coroutineContext[kotlinx.coroutines.Job]?.isActive}")
-
-            val v = withTimeoutOrNull(5000L) {
-                withContext(Dispatchers.IO) {
-                    EmbeddingClient.embed(query)
-                }
-            }
-            Log.d("RAG_DEBUG", "Sau embed, v null? ${v == null}")
-            if (v == null) {
-                Log.e("RAG_DEBUG", "QueryVector NULL — timeout hoặc embed() trả null")
+            if (queryCache.containsKey(query)) {
+                Log.d("RAG_DEBUG", "QueryVector from cache")
+                queryCache[query]
             } else {
-                Log.d("RAG_DEBUG", "QueryVector OK, size=${v.size}")
+                Log.d("RAG_DEBUG", "Bắt đầu gọi EmbeddingClient.embed()")
+                val v = withTimeoutOrNull(5000L) {
+                    withContext(Dispatchers.IO) {
+                        EmbeddingClient.embed(query)
+                    }
+                }
+                if (v == null) {
+                    Log.e("RAG_DEBUG", "QueryVector NULL — timeout hoặc embed() trả null")
+                } else {
+                    Log.d("RAG_DEBUG", "QueryVector OK, size=${v.size}")
+                    queryCache[query] = v  // lưu vào cache
+                }
+                v
             }
-            v
         } catch (e: Exception) {
             Log.e("RAG_DEBUG", "Embed query EXCEPTION: ${e.message}", e)
             null
@@ -94,15 +98,16 @@ object SimpleRAGEngine {
 
         if (queryVector == null) return fallbackRetrieve(query, chunks, topK)
 
-        val scored = chunks.map { chunk ->
-            val score = cosineSimilarity(queryVector, chunk.embedding)
-            Log.d("RAG_DEBUG", "score=$score | book=${chunk.bookId} | chapter=${chunk.chapter}")
-            RetrievedChunk(
-                text = chunk.text,
-                bookId = chunk.bookId,
-                chapter = chunk.chapter,
-                score = score
-            )
+        val scored = withContext(Dispatchers.Default) {
+            chunks.map { chunk ->
+                val score = cosineSimilarity(queryVector, chunk.embedding)
+                RetrievedChunk(
+                    text = chunk.text,
+                    bookId = chunk.bookId,
+                    chapter = chunk.chapter,
+                    score = score
+                )
+            }
         }
 
         val result = scored
@@ -120,6 +125,7 @@ object SimpleRAGEngine {
 
     fun clear() {
         lastKey = ""
+        queryCache.clear()
     }
 
     private fun chunkContent(content: String): List<String> {
@@ -173,7 +179,7 @@ object SimpleRAGEngine {
         val results = chunks
             .map { chunk ->
                 val score = jaccardSimilarity(queryWords, tokenize(chunk.text))
-                Log.d("RAG_DEBUG", "Jaccard score=$score | book=${chunk.bookId} | chapter=${chunk.chapter}")
+                // ← dòng log đã xóa
                 RetrievedChunk(
                     text = chunk.text,
                     bookId = chunk.bookId,
@@ -188,4 +194,5 @@ object SimpleRAGEngine {
         Log.d("RAG_DEBUG", "Fallback result: ${results.size} chunks")
         return results
     }
+
 }
