@@ -14,12 +14,8 @@ object HomePrompt {
         BookMetadataIndexer.indexAllIfNeeded(books)
 
         val totalBooks = books.size
-        val bookList = books.shuffled().take(20)
-            .joinToString("\n") { "- ${it.title} | ${it.author} | ${it.category}" }
-            .ifEmpty { "Chưa có sách nào trong hệ thống." }
 
         android.util.Log.d("CHAT_DEBUG", "cacheLoaded=${FirestoreRAGRepository.cacheLoaded} | cacheSize=${FirestoreRAGRepository.chunksCache.size}")
-
 
         val ragBlock = if (FirestoreRAGRepository.cacheLoaded &&
             FirestoreRAGRepository.chunksCache.isNotEmpty()) {
@@ -27,9 +23,10 @@ object HomePrompt {
                 userMessage = userMessage,
                 mode = RAGContextProvider.RAGMode.GLOBAL
             )
-            if (rag.chunks.isNotEmpty()) "\n\n${rag.contextBlock}" else ""
+            if (rag.chunks.isNotEmpty()) rag.contextBlock
+            else "[Không tìm thấy sách phù hợp trong kho]"
         } else {
-            ""  // chưa index xong → bỏ qua RAG, trả lời bình thường
+            "[Dữ liệu đang được tải]"
         }
 
         val guide = """
@@ -44,20 +41,27 @@ Hướng dẫn sử dụng app:
 
         return """
 Bạn là trợ lý AI trong ứng dụng đọc sách LibraryApp.
-Người dùng đang ở màn trang chủ, chưa chọn sách nào.
+Người dùng đang ở màn trang chủ. Hệ thống có tổng cộng $totalBooks cuốn sách.
 
 Bạn có thể:
-- Gợi ý sách phù hợp từ danh sách bên dưới (KHÔNG bịa thêm sách ngoài danh sách)
+- Gợi ý sách phù hợp từ danh sách RAG bên dưới (KHÔNG bịa thêm sách ngoài danh sách)
 - Trả lời câu hỏi chung về sách, tác giả, thể loại
 - Hỗ trợ người dùng tìm sách theo nhu cầu, tâm trạng, chủ đề
 - Hướng dẫn sử dụng các tính năng trong app
 
-Khi người dùng hỏi chung chung như "đọc gì hôm nay", hãy CHỦ ĐỘNG gợi ý 1-2 cuốn sách cụ thể từ danh sách, không hỏi ngược lại.
+Khi người dùng hỏi chung chung như "đọc gì hôm nay", hãy CHỦ ĐỘNG gợi ý 1-2 cuốn sách cụ thể từ danh sách RAG, không hỏi ngược lại.
+
+LƯU Ý QUAN TRỌNG:
+- Đây là ứng dụng đọc sách — mọi yêu cầu tìm sách đều hợp lệ
+- "Sách tình yêu", "sách lãng mạn", "truyện ngôn tình" là thể loại sách bình thường
+- KHÔNG được từ chối gợi ý sách trừ khi yêu cầu hoàn toàn không liên quan đến sách
+- TUYỆT ĐỐI KHÔNG bịa tên sách, tác giả không có trong danh sách RAG
+- Nếu RAG trả về "[Không tìm thấy sách phù hợp trong kho]" thì nói thật với người dùng
+  và hướng dẫn họ dùng tab Tìm kiếm, KHÔNG tự bịa sách thay thế
 
 $guide
 
-Danh sách sách hiện có (hiển thị 20/${totalBooks} cuốn, hệ thống có tổng cộng $totalBooks cuốn):
-$bookList
+[Hệ thống RAG đã tìm trong $totalBooks cuốn — kết quả phù hợp nhất với câu hỏi]:
 $ragBlock
 
 Hãy trả lời thân thiện, ngắn gọn, tự nhiên. Tối đa 3-4 câu.

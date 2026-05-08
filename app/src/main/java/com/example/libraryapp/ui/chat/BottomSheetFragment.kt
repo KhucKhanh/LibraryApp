@@ -83,6 +83,7 @@ class ChatBottomSheet : BottomSheetDialogFragment() {
             val isFirstMessage = messages.isEmpty()
             val contextSnapshot = AIContextManager.snapshot()
             val history = messages.toList()
+            val currentChatId = chatId
 
             messages.add(Message(text, true))
             chatAdapter.notifyItemInserted(messages.size - 1)
@@ -99,6 +100,7 @@ class ChatBottomSheet : BottomSheetDialogFragment() {
             ) { reply ->
                 activity?.runOnUiThread {
                     if (!isAdded || _binding == null) return@runOnUiThread
+                    if (chatId != currentChatId) return@runOnUiThread
                     messages.add(Message(reply, false))
                     chatAdapter.notifyItemInserted(messages.size - 1)
                     binding.rvChat.scrollToPosition(messages.size - 1)
